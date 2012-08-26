@@ -1,4 +1,3 @@
 OpenIPSC
 ========
-
-Open source implementation of motorola IP site connect repeater linking system
+Open source cross platform DMR Repeater linking protocol.

@@ -1,0 +1,10 @@
+Motorolas MOTOTRBO IPSC protocol
+UDP PACKETS
+2 formats
+heartbeat and voice/data
+
+heartbeat header
+octet 00-01:	Format ID
+octet 01-04:	Repetaer ID
+
+voice/data heade
