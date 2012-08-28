@@ -6,7 +6,7 @@ Motorolas MOTOTRBO IPSC protocol
 |----------------------------------------------------------------------------------------------------------------------------|
 |3c754A779848ca4c7577bfe2080045200030f53e00006d11c4a2436c5679443db599c350c450001cbb1398000000f84000000030220fd1e25c79e348661f|
 |----------------------------------------------------------------------------------------------------------------------------|
-<      ETHERNET HEADER      ><             IPv4 HEADER              ><  UDP HEADER  ><          IPSC HEARTBEAT DATA         >|
+|<    ETHERNET HEADER      ><             IPv4 HEADER              ><  UDP HEADER  ><          IPSC HEARTBEAT DATA         >|
 000 - 005 : Dst mac address
 006 - 011 : Src mac address
 012 - 013 : Packet type (IP 0x0800)
