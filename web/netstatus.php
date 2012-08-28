@@ -20,7 +20,7 @@ $time = microtime();
 $time = explode(' ', $time);
 $time = $time[1] + $time[0];
 $start = $time;
-$cachefile = '/srv/www/htdocs/netstatus/cache/cache.html';
+$cachefile = 'cache/cache.html';
 $cachetime = 60; //CACHE PAGE FOR 60 SECONDS
 if (file_exists($cachefile) && time() - $cachetime < filemtime($cachefile)) {
     include($cachefile);
@@ -31,25 +31,14 @@ ob_start();
 ?>
 <html>
 <body>
-<link rel="stylesheet" href="DMRstatus.css" type="text/css">
-	<div id="header" class="fixed">
-		<div class="nav">
-			<ul>
-			  <li><a href="http://www.dmr-marc.net/index.html">Home</a></li>
-			  <li><a href=""http://www.dmr-marc.net/repeaters.html">Repeaters</a></li>
-              <li><a href="http://dmr.moses.bz/netstatus">Status</a></li>
-			  <li><a href="http://www.dmr-marc.net/FAQ.html">FAQ</a></li>
-			  <li><a href="http://www.dmr-marc.net/contact.html" class="active">Contact Us</a></li>
-			</ul>
-		</div>
-	</div>
+<link rel="stylesheet" href="netstatus.css" type="text/css">
 <br />
 <div id="round_top"></div>
 <div id="content" class="fixed">
     <div id="maincontent">
-        <h2>DMR-MARC Network Status</h2>
+        <h2>DMR Network Status</h2>
         <? 
-        include '/home/kd8eyf/include/dmrdb.inc' ;
+        include '/usr/local/include/dmrdb.inc' ;
         date_default_timezone_set( 'UTC' ) ;
         $Date = date( 'l F jS, Y', time() ) ;
         $DateTime = date( 'd M y, H:i:s', time() ) ;
@@ -168,19 +157,10 @@ ob_start();
 	echo "</table>" ;
 	echo "<br />" ;
     }?>
-      </div>
-	  </div>
-	</div>
-	<div id="round_bottom"></div> 
-	<div id="footer" class="fixed">
-        <p class="copyright"><?echo 'Page Generated:'.$DateTime;?><br/>Copyright &copy; 2010 DMR-MARC. All Rights Reserved.</p>
-    <p class="credits">
-        <strong>Network Status:</strong>
-        <a href="mailto://kd8eyf@digitalham.info">KD8EYF</a><br />
-        <strong>Credits:</strong>
-		 <a href="http://www.oricemedia.ro/servicii/design-siteuri-web.html" title="web design, realizare site-uri, pagini web">Web design</a> by <a href="http://www.oricemedia.ro/" title="agentie web design, print, dtp, mures">Orice Media</a><br />
-    </p>
-</div>
+    </div>
+   </div>
+  </div>
+ <div id="round_bottom"></div> 
 </body>
 </html><?
 $cached = fopen($cachefile, 'w');
