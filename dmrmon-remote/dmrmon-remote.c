@@ -26,10 +26,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA. 
 #include<netinet/ip.h>
 #include<getopt.h>
 struct UDP_hdr {
-	u_short	uh_sport;		/* source port */
-	u_short	uh_dport;		/* destination port */
-	u_short	uh_ulen;		/* datagram length */
-	u_short	uh_sum;			/* datagram checksum */
+	u_short	uh_sport;				//Source Port	
+	u_short	uh_dport;				//Destnation Port
+	u_short	uh_ulen;				//Datagram Length	
+	u_short	uh_sum;					//Datagram Checksum	
 };
 int  debug = 0;
 char *devname = NULL;
@@ -41,7 +41,8 @@ void processPacket(u_char *arg, const struct pcap_pkthdr* pkthdr, const u_char *
 	struct UDP_hdr * udp;
 	unsigned int IP_header_length;	
 	unsigned int capture_len = pkthdr->len;
-	char buffer[15];
+	int Role = 0,TS1Linked=0,TS2Linked=0;		// Role Peer = 0, Slave = 1
+	char buffer[15];				// Used for temporay data conversions
 	long PacketType,SourceID, UserID, DestinationID;
 	char *packetDescription ="unknown";
 	int i=0, *counter = (int *)arg;
@@ -60,16 +61,18 @@ void processPacket(u_char *arg, const struct pcap_pkthdr* pkthdr, const u_char *
 	if ((capture_len >= 20) && (capture_len <= 21)){	//Based on size we might have a motorola heartbeat packet
 		if(((*packet) >= 150) && ((*packet)<=153)){	//Check first offset to see if it really is
 			switch(*packet){			//Set the packet Description
-				case 150: packetDescription = "Master Ping"; break;
-				case 151: packetDescription = "Master Pong"; break;
+				case 150: packetDescription = "Master Ping"; Role = 1; break;
+				case 151: packetDescription = "Master Ping Reply";Role = 1; break;
 				case 152: packetDescription = "Peer Ping"; break;
-				case 153: packetDescription = "Peer Pong"; break;
+				case 153: packetDescription = "Peer Ping Reply"; break;
 				default : packetDescription = "";
 				}
 			sprintf(buffer,"%x",*packet);
        			PacketType = strtol(buffer,NULL,16);
 			sprintf(buffer,"%02x%02x%02x",*(packet+2),*(packet+3),*(packet+4));
 			SourceID = strtol(buffer,NULL,16);
+			sprintf(buffer,"%02x",*(packet+5));
+			printf("%02x",*(packet+5));
 		} 
 	} 	
 	if (debug == 1){
@@ -82,6 +85,7 @@ void processPacket(u_char *arg, const struct pcap_pkthdr* pkthdr, const u_char *
 		printf("IDP Dst Port\t%d\n", ntohs(udp->uh_dport));
 		printf("Packet Type\t%lu\n",PacketType);
 		printf("Packet Desc\t%s\n",packetDescription);
+		printf("Soute Role\t%i\n",Role);
 		printf("Source ID\t%lu\n",SourceID);
 		printf("\nUDP PAYLOAD\n%04x ",j);
    		while (i < capture_len){		
