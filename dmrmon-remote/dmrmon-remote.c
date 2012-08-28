@@ -1,5 +1,5 @@
 /*
-dmrmon - a utility to monitor DMR repeater IP linking protocols
+dmrmon-remote - monitor DMR repeater and send to server 
 Copyright (C) 2012 David Kierzokwski (kd8eyf@digitalham.info)
 
 This program is free software; you can redistribute it and/or
