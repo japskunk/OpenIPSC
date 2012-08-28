@@ -4,3 +4,6 @@ heartbeat header
 octet 00   :	Format ID 
 octet 02-04:	Repetaer ID 
 
+
+Portions of the UDP payload may be scrambled with RC4. CPS ( Customer programming software ) has a "authenciation key" field that is "40 characters 0-9, A-f". Possible that this value is used by the hardware as the keystream and not the key?
+
