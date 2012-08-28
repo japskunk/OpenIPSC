@@ -1,3 +1,3 @@
 OpenIPSC
 ========
-Open source cross platform DMR Repeater linking protocol.
+Utilities for DMR radio networks
