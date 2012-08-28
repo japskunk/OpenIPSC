@@ -42,7 +42,8 @@ void processPacket(u_char *arg, const struct pcap_pkthdr* pkthdr, const u_char *
 	unsigned int IP_header_length;	
 	unsigned int capture_len = pkthdr->len;
 	unsigned int SourceID;
-	unsigned int PacketType;
+	char packetType[2];
+	char *packetDescription;
 	unsigned int UserID;
 	int i=0, *counter = (int *)arg;
 	
@@ -54,7 +55,18 @@ void processPacket(u_char *arg, const struct pcap_pkthdr* pkthdr, const u_char *
 	capture_len -= IP_header_length;	
 	udp = (struct UDP_hdr*) packet;
 	packet += sizeof (struct UDP_hdr);
-	if (	
+	sprintf(packetType,"%x",*packet);
+	if ((capture_len >= 28) && (capture_len <= 29)){	//Based on size we might have a heartbeat packet
+		if ((*packet) >= 150) && (*packet <= 153)){	//Check first offset to see if it really is
+			switch(*packet){			//Set the packet Description
+				case 150: packetDescription = "Master Ping"; break;
+				case 151: packetDescription = "Master Pong"; break;
+				case 152: packetDescription = "Peer Ping"; break;
+				case 153: packetDescription = "Peer Pong"; break;
+				}
+			sprintf(packetType,"%x",*packet);	//Set the Packet Type
+		}  
+	} 	
 	if (debug == 1){
 		printf("Packet Count:\t%d\n", ++(*counter));	
 		printf("Packet Size:\t%d\n", capture_len);
@@ -62,11 +74,13 @@ void processPacket(u_char *arg, const struct pcap_pkthdr* pkthdr, const u_char *
 		printf("Size IP Header\t%u\n",IP_header_length);
 		printf("UDP Src Port\t%d\n", ntohs(udp->uh_sport));
 		printf("IDP Dst Port\t%d\n", ntohs(udp->uh_dport));
+		printf("Packet Type\t0x%s\n",packetType);
+		printf("Packet Desc\t%s\n",packetDescription);
 	}
-        for (i=0; i<capture_len; i++) {
-	        printf("%x ", packet[i]);
+//        for (i=0; i<capture_len; i++) {
+//	        printf("%x ", packet[i]);
 	
-}                        
+//}                        
 printf("\n");
         return;
 }
