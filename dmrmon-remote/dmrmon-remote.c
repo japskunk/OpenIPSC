@@ -41,10 +41,9 @@ void processPacket(u_char *arg, const struct pcap_pkthdr* pkthdr, const u_char *
 	struct UDP_hdr * udp;
 	unsigned int IP_header_length;	
 	unsigned int capture_len = pkthdr->len;
-	unsigned int SourceID;
-	char packetType[2];
-	char *packetDescription;
-	unsigned int UserID;
+	char buffer[15];
+	long PacketType,SourceID, UserID, DestinationID;
+	char *packetDescription ="unknown";
 	int i=0, *counter = (int *)arg;
 	
 	packet += sizeof (struct ether_header);
@@ -55,33 +54,46 @@ void processPacket(u_char *arg, const struct pcap_pkthdr* pkthdr, const u_char *
 	capture_len -= IP_header_length;	
 	udp = (struct UDP_hdr*) packet;
 	packet += sizeof (struct UDP_hdr);
-	sprintf(packetType,"%x",*packet);
-	if ((capture_len >= 28) && (capture_len <= 29)){	//Based on size we might have a heartbeat packet
-		if ((*packet) >= 150) && (*packet <= 153)){	//Check first offset to see if it really is
+	capture_len -= sizeof (struct UDP_hdr);
+	sprintf(buffer,"%x",*packet);
+	PacketType = strtol(buffer,NULL,16);
+	if ((capture_len >= 20) && (capture_len <= 21)){	//Based on size we might have a motorola heartbeat packet
+		if(((*packet) >= 150) && ((*packet)<=153)){	//Check first offset to see if it really is
 			switch(*packet){			//Set the packet Description
 				case 150: packetDescription = "Master Ping"; break;
 				case 151: packetDescription = "Master Pong"; break;
 				case 152: packetDescription = "Peer Ping"; break;
 				case 153: packetDescription = "Peer Pong"; break;
+				default : packetDescription = "";
 				}
-			sprintf(packetType,"%x",*packet);	//Set the Packet Type
-		}  
+			sprintf(buffer,"%x",*packet);
+       			PacketType = strtol(buffer,NULL,16);
+			sprintf(buffer,"%02x%02x%02x",*(packet+2),*(packet+3),*(packet+4));
+			SourceID = strtol(buffer,NULL,16);
+		} 
 	} 	
 	if (debug == 1){
+		uint32_t i=0, j=0;
 		printf("Packet Count:\t%d\n", ++(*counter));	
 		printf("Packet Size:\t%d\n", capture_len);
 		printf("Size ETH Header\t%lu\n",sizeof(struct ether_header));
 		printf("Size IP Header\t%u\n",IP_header_length);
 		printf("UDP Src Port\t%d\n", ntohs(udp->uh_sport));
 		printf("IDP Dst Port\t%d\n", ntohs(udp->uh_dport));
-		printf("Packet Type\t0x%s\n",packetType);
+		printf("Packet Type\t%lu\n",PacketType);
 		printf("Packet Desc\t%s\n",packetDescription);
-	}
-//        for (i=0; i<capture_len; i++) {
-//	        printf("%x ", packet[i]);
-	
-//}                        
-printf("\n");
+		printf("Source ID\t%lu\n",SourceID);
+		printf("\nUDP PAYLOAD\n%04x ",j);
+   		while (i < capture_len){		
+			printf("%02x ", packet[i]);   
+			i++; j++;
+			if (j == 8) printf("  ");
+			if (j == 16){ printf("\n%04x ",i); 
+				j=0; 
+						}
+			}
+	}                        
+printf("\n\n\n");
         return;
 }
 
@@ -158,3 +170,15 @@ int version ( void )
         printf ("dmrmon 0.01\n");
         exit(1);
 }
+
+
+
+
+
+
+
+
+
+
+
+
