@@ -15,7 +15,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA. */
-
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
@@ -28,12 +27,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA. 
 #include<getopt.h>
 int  debug = 0;
 char *devname = NULL;
-char *readFile = NULL;
+
 void usage( int8_t e );
 void processPacket(u_char *arg, const struct pcap_pkthdr* pkthdr, const u_char * packet)
 {
 	int i=0, *counter = (int *)arg;
-	uint8_t ip_proto = 0;
 	if (debug == 1){
 		printf("Packet Count: %d\n", ++(*counter));
 	        printf("Received Packet Size: %d\n", pkthdr->len);
@@ -48,7 +46,10 @@ printf("\n");
 
 int main(int argc, char *argv[] )
 {
-        pcap_t *descr = NULL;
+	char packet_filter[] = "ip and udp";
+	struct bpf_program fcode;
+	u_int netmask;
+	pcap_t *descr = NULL;
         int32_t c;
         while ((c = getopt(argc, argv, "dVhi:")) != EOF) {
                 switch (c) {
@@ -82,7 +83,8 @@ int main(int argc, char *argv[] )
                 fprintf(stderr, "Couldn't open device %s : %s\n" , devname , errbuf);
                 exit(1);
         }
-        if ( pcap_loop(handle, -1, processPacket, (u_char *)&count) == -1) {
+        pcap_compile(handle, &fcode, packet_filter, 1, netmask);
+	if ( pcap_loop(handle, -1, processPacket, (u_char *)&count) == -1) {
                 fprintf(stderr, "ERROR: %s\n", pcap_geterr(descr) );
                 exit(1);
         }
