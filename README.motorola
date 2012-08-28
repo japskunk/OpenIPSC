@@ -1,8 +1,28 @@
 Motorolas MOTOTRBO IPSC protocol
-
-heartbeat header
-octet 00   :	Format ID 
-octet 02-04:	Repetaer ID 
+-----------------------------------------------------------------------------------------------------------------------------|
+|                                     IPSC HEARBEAT UDP PACKET                                                               |
+|0                   1                   2                   3                   4                   5                   6   |
+|0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 |
+|----------------------------------------------------------------------------------------------------------------------------|
+|3c754A779848ca4c7577bfe2080045200030f53e00006d11c4a2436c5679443db599c350c450001cbb1398000000f84000000030220fd1e25c79e348661f|
+|----------------------------------------------------------------------------------------------------------------------------|
+<      ETHERNET HEADER      ><             IPv4 HEADER              ><  UDP HEADER  ><          IPSC HEARTBEAT DATA         >|
+000 - 005 : Dst mac address
+006 - 011 : Src mac address
+012 - 013 : Packet type (IP 0x0800)
+023 - 023 : Protocol (UDP 17)
+026 - 029 : Src IPv4 Address
+030 - 033 : Dst IPv4 Address
+034 - 035 : Src UDP Port
+036 - 037 : Dst UDP Port
+040 - 041 : Checksum
+042 - 042 : Format 
+046 - 048 : Repeater Peer DMR Id
+049 - 050 : Destination Dmr Id (Talkgroub)
+051 - 051 : Voice / Data
+052 - 055 : Control Flags
+056 - 056 : Call Start Stop Flags
+057 - 057 : ?? << coming soon
 
 
 Portions of the UDP payload may be scrambled with RC4. CPS ( Customer programming software ) has a "authenciation key" field that is "40 characters 0-9, A-f". Possible that this value is used by the hardware as the keystream and not the key?
