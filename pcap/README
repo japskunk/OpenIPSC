@@ -1,4 +1,4 @@
-Capture file names are non spaced hexdumps of UDP payload. Captures are filtered currently only showing 1 Master and 1 slave device.
+Captures are filtered currently only showing 1 Master and 1 slave device.
 encrypted to protect source network. Email davidkierz@gmail.com for decryption key
 
 MSTRRRRRRRRSSSSSSSSDDDDDDDD.pcap
