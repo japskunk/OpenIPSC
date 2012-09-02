@@ -31,7 +31,7 @@ struct UDP_hdr {
         u_short	uh_ulen;				//Datagram Length
         u_short	uh_sum;					//Datagram Checksum
 };
-int  debug = 0;
+int  isDMR=0,DMRonly=0,debug = 0;
 char *devname = NULL;
 
 void usage( int8_t e );
@@ -41,12 +41,13 @@ void processPacket(u_char *arg, const struct pcap_pkthdr* pkthdr, const u_char *
         struct UDP_hdr * udp;
         unsigned int IP_header_length;
         unsigned int capture_len = pkthdr->len;
-        int isDMR=0, Role = 0,TS1Linked=0,TS2Linked=0;		// Role Peer = 0, Slave = 1
+        int Role = 0,TS1Linked=0,TS2Linked=0;		// Role Peer = 0, Slave = 1
         char buffer[15];				// Used for temporay data conversions
         long PacketType,SourceID, UserID, DestinationID;
         char *packetDescription ="unknown";
         int i=0, *counter = (int *)arg;
-        packet += sizeof (struct ether_header);
+        isDMR = 0; 
+	packet += sizeof (struct ether_header);
         capture_len -= sizeof(struct ether_header);
         ip = (struct ip*) packet;
         IP_header_length = ip->ip_hl *4;
@@ -85,7 +86,8 @@ void processPacket(u_char *arg, const struct pcap_pkthdr* pkthdr, const u_char *
 
                 }
         }
-        if (debug == 1) {
+        if ((isDMR == 0) && (DMRonly == 1)) return;
+	if (debug == 1) {
                 uint32_t i=0, j=0;
                 printf("\n\n\n");
                 printf("Packet Count:\t%d\n", ++(*counter));
@@ -113,15 +115,13 @@ void processPacket(u_char *arg, const struct pcap_pkthdr* pkthdr, const u_char *
                                 j=0;
                         }
                 }
-        } else if (debug ==2) {
+        }
+        if (debug == 2) {
                 while (i < capture_len) {
                         printf("%02X", packet[i]);
                         i++;
                 }
         }
-
-        printf("\n");
-        return;
 }
 int main(int argc, char *argv[] )
 {
@@ -130,7 +130,7 @@ int main(int argc, char *argv[] )
         u_int netmask;
         pcap_t *descr = NULL;
         int32_t c;
-        while ((c = getopt(argc, argv, "pdVhi:")) != EOF) {
+        while ((c = getopt(argc, argv, "opdVhi:")) != EOF) {
                 switch (c) {
                 case 'd':
                         debug = 1;
@@ -147,7 +147,10 @@ int main(int argc, char *argv[] )
                 case 'h':
                         usage(-1);
                         break;
-                }
+                case 'o':
+			DMRonly = 1;
+			break;
+		}
         }
         if (devname == NULL) {
                 usage(-1);
@@ -180,11 +183,12 @@ void usage(int8_t e)
         printf(	"Usage: dmrmon-remote [OPTION]... [REMOTE SERVER]...\n"
                 "Listen send DMR data for remote server for processing\n"
                 "\n"
-                "   -i, --interface		Interface to listen on\n"
+                "   -i, --interface	Interface to listen on\n"
                 "   -h, --help		This Help\n"
-                "   -V, --version		Version Information\n"
+                "   -V, --version	Version Information\n"
                 "   -d, --debug		Show verbose information\n"
-                "   -p, --payload  		Dump only UDP payload data in one line hex\n"
+                "   -p, --payload  	Dump UDP payload data in one line hex (usefull for reverse engineering)\n"
+		"   -o, --dmr		Only print packets identified as DMR\n"	
                 "\n"
                 "With no REMOTE SERVER or REMOTE SERVER is -, output to standard output\n"
                 "\n"
