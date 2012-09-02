@@ -1,0 +1,11 @@
+Capture file names are non spaced hexdumps of UDP payload. Captures are filtered currently only showing 1 Master and 1 slave device.
+encrypted to protect source network. Email davidkierz@gmail.com for decryption key
+
+MSTRRRRRRRRSSSSSSSSDDDDDDDD.pcap
+
+M:Manufacture 	H hytera, M Motorola
+S:Slot		1 or 2
+T:Type		G group voice P private voice
+R:Repeater 	DMR ID for the Source Repetaer
+S:Src Radio	DMR ID for the Source Radio
+D:Destination	DMR ID for the Destination
