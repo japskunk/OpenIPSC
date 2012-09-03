@@ -121,7 +121,8 @@ void processPacket(u_char *arg, const struct pcap_pkthdr* pkthdr, const u_char *
                         printf("%02X", packet[i]);
                         i++;
                 }
-        }
+        printf("\n");
+	}
 }
 int main(int argc, char *argv[] )
 {
