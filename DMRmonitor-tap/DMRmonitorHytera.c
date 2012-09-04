@@ -33,7 +33,7 @@ struct UDP_hdr {
 };
 int  isDMR=0,DMRonly=0,debug = 0;
 char *devname = NULL;
-
+uint16_t SrcID = ((uint16_t)67 << 8) | ((uint16_t)65 << 0);
 void usage( int8_t e );
 void processPacket(u_char *arg, const struct pcap_pkthdr* pkthdr, const u_char * packet)
 {
@@ -44,7 +44,8 @@ void processPacket(u_char *arg, const struct pcap_pkthdr* pkthdr, const u_char *
         int Role = 0,TS1Linked=0,TS2Linked=0;		// Role Peer = 0, Slave = 1
         char buffer[15];				// Used for temporay data conversions
         long PacketType,SourceID, UserID, DestinationID;
-        char *packetDescription ="unknown";
+        long value;
+	char *packetDescription ="unknown";
         int i=0, *counter = (int *)arg;
         isDMR = 0; 
 	packet += sizeof (struct ether_header);
@@ -60,7 +61,9 @@ void processPacket(u_char *arg, const struct pcap_pkthdr* pkthdr, const u_char *
         PacketType = strtol(buffer,NULL,16);
         if (capture_len == 72) {
 		isDMR = 1;
-		printf("HYTERA VOICE FRAME\n");
+		sprintf(buffer,"%02x%02x%02x%02x", *(packet+67), *(packet+66), *(packet+65), *(packet+64));
+		value = strtol(buffer,NULL,16);
+		printf("%s %d %li\n",inet_ntoa(ip->ip_src), ntohs(udp->uh_dport), value);
 	}
 	if ((isDMR == 0) && (DMRonly == 1)) return;
 	if (debug == 1) {
