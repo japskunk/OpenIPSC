@@ -41,7 +41,6 @@ void processPacket(u_char *arg, const struct pcap_pkthdr* pkthdr, const u_char *
         struct UDP_hdr * udp;
         unsigned int IP_header_length;
         unsigned int capture_len = pkthdr->len;
-        int Role = 0,TS1Linked=0,TS2Linked=0;		// Role Peer = 0, Slave = 1
         char buffer[15];				// Used for temporay data conversions
         long PacketType,SourceID, UserID, DestinationID;
         long value;
@@ -63,44 +62,7 @@ void processPacket(u_char *arg, const struct pcap_pkthdr* pkthdr, const u_char *
 		isDMR = 1;
 		sprintf(buffer,"%02x%02x%02x%02x", *(packet+67), *(packet+66), *(packet+65), *(packet+64));
 		value = strtol(buffer,NULL,16);
-		printf("%s %d %li\n",inet_ntoa(ip->ip_src), ntohs(udp->uh_dport), value);
-	}
-	if ((isDMR == 0) && (DMRonly == 1)) return;
-	if (debug == 1) {
-                uint32_t i=0, j=0;
-                printf("\n\n\n");
-                printf("Packet Count:\t%d\n", ++(*counter));
-                printf("Packet Size:\t%d\n", capture_len);
-                printf("Size ETH Header\t%lu\n",sizeof(struct ether_header));
-                printf("Size IP Header\t%u\n",IP_header_length);
-                printf("UDP Src Port\t%d\n", ntohs(udp->uh_sport));
-                printf("IDP Dst Port\t%d\n", ntohs(udp->uh_dport));
-                printf("Packet Type\t%lu\n",PacketType);
-                printf("Packet Desc\t%s\n",packetDescription);
-                printf("Soute Role\t%i\n",Role);
-                printf("Source ID\t%lu\n",SourceID);
-                printf("Slot1 Status\t%i\n",TS1Linked);
-                printf("Slot2 Status\t%i\n",TS2Linked);
-                printf("\n%04x ",j);
-                while (i < capture_len) {
-                        printf("%02x ", packet[i]);
-                        i++;
-                        j++;
-                        if (j == 8) {
-                                printf("  ");
-                        }
-                        if (j == 16) {
-                                printf("\n%04x ",i);
-                                j=0;
-                        }
-                }
-        }
-        if (debug == 2) {
-                while (i < capture_len) {
-                        printf("%02X", packet[i]);
-                        i++;
-                }
-        printf("\n");
+		printf("%s %d %02x %02x %02x %li\n",inet_ntoa(ip->ip_src), ntohs(udp->uh_dport), *(packet+4), *(packet+62), *(packet+8), value);
 	}
 }
 int main(int argc, char *argv[] )
@@ -110,14 +72,8 @@ int main(int argc, char *argv[] )
         u_int netmask;
         pcap_t *descr = NULL;
         int32_t c;
-        while ((c = getopt(argc, argv, "opdVhi:")) != EOF) {
+        while ((c = getopt(argc, argv, "Vhi:")) != EOF) {
                 switch (c) {
-                case 'd':
-                        debug = 1;
-                        break;
-                case 'p':
-                        debug = 2;
-                        break;
                 case 'V':
                         version();
                         break;
@@ -127,9 +83,6 @@ int main(int argc, char *argv[] )
                 case 'h':
                         usage(-1);
                         break;
-                case 'o':
-			DMRonly = 1;
-			break;
 		}
         }
         if (devname == NULL) {
@@ -154,27 +107,16 @@ int main(int argc, char *argv[] )
                 fprintf(stderr, "ERROR: %s\n", pcap_geterr(descr) );
                 exit(1);
         }
-
-
         return 0;
 }
 void usage(int8_t e)
 {
-        printf(	"Usage: dmrmon-remote [OPTION]... [REMOTE SERVER]...\n"
+        printf(	"Usage: DMRmontiorHytera [OPTION]... \n"
                 "Listen send DMR data for remote server for processing\n"
                 "\n"
                 "   -i, --interface	Interface to listen on\n"
                 "   -h, --help		This Help\n"
                 "   -V, --version	Version Information\n"
-                "   -d, --debug		Show verbose information\n"
-                "   -p, --payload  	Dump UDP payload data in one line hex (usefull for reverse engineering)\n"
-		"   -o, --dmr		Only print packets identified as DMR\n"	
-                "\n"
-                "With no REMOTE SERVER or REMOTE SERVER is -, output to standard output\n"
-                "\n"
-                "Examples:\n"
-                "   dmrmon-remote -i eth0 192.168.10.20 50000\n"
-                "   Send the DMR data heard on eth0 to remote server\n"
                 "\n"
                 "Report cat bugs to kd8eyf@digitalham.info\n");
         exit(e);
@@ -182,7 +124,7 @@ void usage(int8_t e)
 
 int version ( void )
 {
-        printf ("dmrmon 0.01\n");
+        printf ("DMRmonitorHytera 0.03\n");
         exit(1);
 }
 
