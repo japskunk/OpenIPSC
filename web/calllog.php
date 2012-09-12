@@ -126,10 +126,6 @@
     </div>
    </div>
   </div>
-  <div id="footer" class="fixed">
-		<p class="credits">
-            UNDER CONSTRUCTION  UNDER CONSTRUCTION  UNDER CONSTRUCTION  UNDER CONSTRUCTION  UNDER CONSTRUCTION  
-		 </p>				   
-	</div>
+  <div id="footer" class="fixed"><a href="https://github.com/KD8EYF/OpenIPSC">OpenIPSC DMR Monitor</a><div id="credits">&copy 2012 KD8EYF</div></div>
 </body>
 </html>
