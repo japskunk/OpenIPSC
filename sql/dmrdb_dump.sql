@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Aug 28, 2012 at 12:24 AM
+-- Generation Time: Sep 12, 2012 at 05:27 AM
 -- Server version: 5.0.51a-24+lenny5
 -- PHP Version: 5.2.6-1+lenny16
 
@@ -19,6 +19,8 @@ SET time_zone = "+00:00";
 --
 -- Database: `dmrdb`
 --
+CREATE DATABASE `dmrdb` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
+USE `dmrdb`;
 
 -- --------------------------------------------------------
 
@@ -39,50 +41,6 @@ CREATE TABLE IF NOT EXISTS `ChangeLog` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `Events`
---
-
-CREATE TABLE IF NOT EXISTS `Events` (
-  `DateTime` datetime NOT NULL COMMENT 'UTC Start of transmission',
-  `EndTime` datetime NOT NULL COMMENT 'UTC end of transmission',
-  `DmrID` int(11) NOT NULL COMMENT 'the ID of the device making the call',
-  `SourceID` int(9) NOT NULL COMMENT 'The repeater that sourced the call.',
-  `DestinationID` int(9) NOT NULL COMMENT 'the destination of the call - can be group or private id''s',
-  `NetworkID` int(9) NOT NULL COMMENT 'the network which the call originated from',
-  `Slot` int(9) NOT NULL COMMENT 'either slot 1 or 2...',
-  `Sequence` int(32) NOT NULL,
-  `RawData` char(64) NOT NULL COMMENT 'raw octets from the IPSC stream',
-  `Answer` tinyint(1) NOT NULL,
-  `Data` tinyint(1) NOT NULL COMMENT 'data call',
-  `Final` tinyint(1) NOT NULL,
-  `Group` tinyint(1) NOT NULL COMMENT 'indicate a group call',
-  `Private` tinyint(1) NOT NULL COMMENT 'private call',
-  `Voice` tinyint(1) NOT NULL COMMENT 'indicates a voice call'
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `Log`
---
-
-CREATE TABLE IF NOT EXISTS `Log` (
-  `date_time` datetime NOT NULL,
-  `from_id` int(7) NOT NULL,
-  `rptr_id` int(6) NOT NULL,
-  `grp_id` int(8) NOT NULL,
-  `seq` int(3) NOT NULL,
-  `ts` int(3) NOT NULL,
-  `flags` varchar(10) collate latin1_german1_ci NOT NULL,
-  `rawdata` varchar(120) character set ascii NOT NULL,
-  `end_time` time NOT NULL,
-  `net` int(5) NOT NULL,
-  KEY `TST` (`date_time`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 COLLATE=latin1_german1_ci COMMENT='DMR-Logbuch';
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `Network`
 --
 
@@ -90,6 +48,7 @@ CREATE TABLE IF NOT EXISTS `Network` (
   `DmrID` int(7) NOT NULL,
   `Description` varchar(64) NOT NULL,
   `Publish` tinyint(1) NOT NULL default '1',
+  `Mi5Publish` tinyint(1) NOT NULL,
   PRIMARY KEY  (`DmrID`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
@@ -133,6 +92,7 @@ CREATE TABLE IF NOT EXISTS `Repeater` (
   `State` char(32) NOT NULL,
   `Country` char(32) NOT NULL,
   `Frequency` char(32) NOT NULL,
+  `ColorCode` int(11) NOT NULL,
   `Offset` char(32) NOT NULL,
   `Assigned` char(32) NOT NULL,
   `Linked` char(32) NOT NULL,
@@ -157,6 +117,22 @@ CREATE TABLE IF NOT EXISTS `Repeater` (
   PRIMARY KEY  (`DmrID`),
   KEY `Affilated` (`Affilated`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='DMR-MARC and other database of worldwide repeaters';
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `RepeaterLog`
+--
+
+CREATE TABLE IF NOT EXISTS `RepeaterLog` (
+  `DmrID` int(11) NOT NULL,
+  `SourceNet` int(11) NOT NULL,
+  `DateTime` datetime NOT NULL,
+  `Ts1Online` int(11) NOT NULL,
+  `Ts2Online` int(11) NOT NULL,
+  `PacketType` int(11) NOT NULL,
+  `TimeSlotRaw` varchar(2) NOT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
@@ -192,6 +168,30 @@ CREATE TABLE IF NOT EXISTS `User` (
   `Remarks` char(32) NOT NULL,
   UNIQUE KEY `DmrID` (`DmrID`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `UserLog`
+--
+
+CREATE TABLE IF NOT EXISTS `UserLog` (
+  `Key` bigint(20) NOT NULL,
+  `StartTime` datetime NOT NULL,
+  `EndTime` datetime NOT NULL,
+  `SourceNet` int(11) NOT NULL,
+  `PacketType` int(2) NOT NULL,
+  `RepeaterID` int(11) NOT NULL,
+  `DmrID` int(11) NOT NULL,
+  `DestinationID` int(11) NOT NULL,
+  `Sequence` int(11) NOT NULL,
+  `TimeSlot` int(11) NOT NULL,
+  `GroupCall` int(11) NOT NULL,
+  `PrivateCall` int(11) NOT NULL,
+  `VoiceCall` tinyint(1) NOT NULL,
+  `DataCall` int(11) NOT NULL,
+  PRIMARY KEY  (`Key`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
