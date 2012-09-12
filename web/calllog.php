@@ -1,6 +1,6 @@
 <?php 
 //
-//lastheard.php - render webpage of dmr repeater status 
+//calllog.php - render webpage of dmr repeater status 
 //Copyright (C) 2012 David Kierzokwski (kd8eyf@digitalham.info)
 //
 //This program is free software; you can redistribute it and/or
@@ -20,7 +20,17 @@
 <html>
 <body>
 <link rel="stylesheet" href="netstatus.css" type="text/css">
-<br />
+<div id="header" class="fixed">
+		<div class="nav">
+			<ul>
+              <li><a href="netstatus.php">NetStatus</a></li>
+			  <li><a href="lastheard.php">LastHeard</a></li>		
+			  <li><a href="calllog.php"class="active" >Call Log</a></li>
+              
+			  </div>
+			  </ul>
+		</div>
+	</div>
 <div id="content" class="fixed">
     <div id="maincontent">
         <h2>DMR Call Log</h2>
@@ -111,6 +121,10 @@
     </div>
    </div>
   </div>
- <div id="round_bottom"></div> 
+  <div id="footer" class="fixed">
+		<p class="credits">
+            UNDER CONSTRUCTION  UNDER CONSTRUCTION  UNDER CONSTRUCTION  UNDER CONSTRUCTION  UNDER CONSTRUCTION  
+		 </p>				   
+	</div>
 </body>
 </html>

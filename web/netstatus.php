@@ -16,11 +16,32 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+$time = microtime();
+$time = explode(' ', $time);
+$time = $time[1] + $time[0];
+$start = $time;
+$cachefile = 'cache.html';
+$cachetime = 60; //CACHE PAGE FOR 60 SECONDS
+if (file_exists($cachefile) && time() - $cachetime < filemtime($cachefile)) {
+    include($cachefile);
+    echo "<!-- Cached copy, generated ".date('H:i', filemtime($cachefile))." -->\n";
+    exit;
+}
+ob_start();
 ?>
 <html>
 <body>
 <link rel="stylesheet" href="netstatus.css" type="text/css">
-<br />
+<div id="header" class="fixed">
+		<div class="nav">
+			<ul>
+			  <li><a href="netstatus.php" class="active" >NetStatus</a></li>
+              <li><a href="lastheard.php" >LastHeard</a></li>		
+			  <li><a href="calllog.php">Call Log</a></li>
+			  </div>
+			  </ul>
+		</div>
+	</div>
 <div id="content" class="fixed">
     <div id="maincontent">
         <h2>DMR Network Status</h2>
@@ -69,69 +90,29 @@ Repeater.DmrID = Network.DmrID ) WHERE Repeater.Publish = '1' AND Repeater.Sourc
             $Result2 = mysql_query( $Query ) or die( mysql_errno . " " . mysql_error() ) ;
             $i = 1 ;
             while ( $Repeater = mysql_fetch_array( $Result2 ) ) {
-               
                 if ( $i % 2 != 0 ) $RowClass = "odd" ; else  $RowClass = "even" ;
                 if ( $Repeater[Role]==1) $RowClass = "master" ;                   
-                if ( $Repeater[Country] == '' ) { $Country = $Repeater[DmrID] ;
-                } else {
-                    $Country = $Repeater[Country] ;
-                };
-                
-                if ( $Repeater[City] == '' ) {
-                    $City = "" ;
-                } else {
-                    $City = $Repeater[City] ;
-                };
-                
-                if ( $Repeater[Frequency] == '' ) {
-                    $Frequency = "" ;
-		          } else {
-                    $Frequency = $Repeater[Frequency] ;
-                };
-                
-                if ( $Repeater[Offset] == '' ) {
-                    $Offset = "" ;
-                } else {
-                    $Offset = $Repeater[Offset] ;
-                };
-		
-                if ( $Repeater[Trustee] == '' ) {
-                    $Trustee = "" ;
-                } else {
-                    $Trustee = $Repeater[Trustee] ;
-                };            
                 if ( $Repeater[Publish] == 1 ) {
+                $LongAgo = ( strtotime( "now" ) - strtotime( $Repeater[LastHeard] ) ) ;
 
 			echo "<td nowrap class=$RowClass>$Repeater[Country]</td>" ;
 			echo "<td nowrap class=$RowClass>$Repeater[State]</td>" ;
-			echo "<td nowrap class=$RowClass>$City </td>" ;
-			echo "<td nowrap class=$RowClass>$Frequency</td>" ;
-			echo "<td nowrap class=$RowClass>$Offset</td>" ;
-			echo "<td width=100% nowrap class=$RowClass>$Trustee</td>" ;
-			$LongAgo = ( strtotime( "now" ) - strtotime( $Repeater[LastHeard] ) ) ;
-			if ( $Repeater[Override] == 1 ) {
+			echo "<td nowrap class=$RowClass>$Repeater[City] </td>" ;
+			echo "<td nowrap class=$RowClass>$Repeater[Frequency]</td>" ;
+			echo "<td nowrap class=$RowClass>$Repeater[Offset]</td>" ;
+			echo "<td width=100% nowrap class=$RowClass>$Repeater[Trustee]</td>" ;
+        	if ( $Repeater[Override] == 1 ) {
 				if ( $Repeater[OverrideOnline] == 1 ) {
 					echo "<td class=online>ONLINE</td>" ;
-					if ( $Repeater[OverrideTs1Online] == 1 ) {
-						echo "<td class=online>LINKED</td>" ;
-					} else {
-						echo "<td class=local>LOCAL</td>" ;
-					}
-					if ( $Repeater[OverrideTs2Online] == 1 ) {
-						echo "<td class=online>LINKED</td>" ;
-					} else {
-						echo "<td class=local>LOCAL</td>" ;
-					}
+					if ( $Repeater[OverrideTs1Online] == 1 ) { echo "<td class=online>LINKED</td>" ;
+					} else { echo "<td class=local>LOCAL</td>" ; }
+					if ( $Repeater[OverrideTs2Online] == 1 ) { echo "<td class=online>LINKED</td>" ;
+					} else { echo "<td class=local>LOCAL</td>" ; }
 				} else {
-					echo "<td class=offline>OFFLINE</td>" ;
-					echo "<td class=unknown>UNKNOWN</td>" ;
-					echo "<td class=unknown>UNKNOWN</td>" ;
-				}
+					echo "<td class=offline>LH: ".duration($LongAgo)."</td><td class=offline></td><td class=offline></td>"; }
 			} else {
-				if ( $LongAgo > 60 ) {
-					echo "<td class=offline>OFFLINE</td>" ;
-					echo "<td class=unknown>UNKNOWN</td>" ;
-					echo "<td class=unknown>UNKNOWN</td>" ;
+                if (($LongAgo > 60)){
+					echo "<td class=offline>LH: ".duration($LongAgo)."</td><td class=offline></td><td class=offline></td>";
 				} else {
 					echo "<td class=online>ONLINE</td>" ;
 					if ( $Repeater[Ts1Online] == 1 ) {
@@ -157,6 +138,35 @@ Repeater.DmrID = Network.DmrID ) WHERE Repeater.Publish = '1' AND Repeater.Sourc
     </div>
    </div>
   </div>
- <div id="round_bottom"></div> 
+  <div id="footer" class="fixed">
+		<p class="credits">
+            UNDER CONSTRUCTION  UNDER CONSTRUCTION  UNDER CONSTRUCTION  UNDER CONSTRUCTION  UNDER CONSTRUCTION  
+		 </p>				   
+	</div>
 </body>
 </html>
+<?
+function duration( $seconds )
+{
+	$days = floor( $seconds / 60 / 60 / 24 ) ;
+	$hours = $seconds / 60 / 60 % 24 ;
+	$mins = $seconds / 60 % 60 ;
+	$secs = $seconds % 60 ;
+	$duration = '' ;
+	if ( $days > 0 ) {
+		$duration = "$days"."D" ;
+	} elseif ( $hours > 0 ) $duration .= "$hours" . "H" ;
+	if ( $mins > 0 ) $duration .= "$mins" . "M" ;
+	if ( ( $secs > 0 ) && ( $hours < 1 ) && ( $mins < 10 ) ) $duration .= "$secs" .
+			"S" ;
+	$duration = trim( $duration ) ;
+	if ($seconds >= 365*24*60) {$duration = "NEVER";};
+ 
+    if ( $duration == null ) $duration = '0' . 'S' ;
+	return $duration ;
+} 
+$cached = fopen($cachefile, 'w');
+fwrite($cached, ob_get_contents());
+fclose($cached);
+ob_end_flush(); 
+?>

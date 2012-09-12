@@ -1,6 +1,6 @@
 <?php 
 //
-//lastheard.php - render webpage of dmr repeater status 
+//lastheard.php - render webpage of dmr lasthead list 
 //Copyright (C) 2012 David Kierzokwski (kd8eyf@digitalham.info)
 //
 //This program is free software; you can redistribute it and/or
@@ -20,17 +20,27 @@
 <html>
 <body>
 <link rel="stylesheet" href="netstatus.css" type="text/css">
-<br />
+<div id="header" class="fixed">
+		<div class="nav">
+			<ul>
+			  <li><a href="netstatus.php">NetStatus</a></li>
+              <li><a href="lastheard.php" class="active">LastHeard</a></li>		
+			  <li><a href="calllog.php">Call Log</a></li>
+			  </div>
+			  </ul>
+		</div>
+	</div>
 <div id="content" class="fixed">
     <div id="maincontent">
-        <h2>DMR Call Log</h2>
+        <h2>DMR Last Heard List</h2>
         <table  width="100%" border="0" cellspacing="0" >
                 <tr>
                     <td colspan=10 class="networkheader"><? echo $SourceNet[Description]; ?></td>
                 </tr>
                 <tr>
                     <th>Date</th>
-                    <th>ID</th>
+                    <th>Time</th>
+                    <th>LongAgo</th>
                     <th>Callsign</th>
                     <th>Name</th>
                     <th>Repeater</th>
@@ -72,6 +82,8 @@
                         Repeater 
                     ON 
                         (UserLog.RepeaterID = Repeater.DmrID )
+                    GROUP BY
+                        DmrID
                     ORDER BY 
                         StartTime DESC 
                     LIMIT 
@@ -80,14 +92,17 @@
         $Result = mysql_query( $Query ) or die( mysql_errno . " " . mysql_error() ) ;
         while ( $Event = mysql_fetch_array( $Result ) ) {
                 $Audience = ""; $Type="";
+                $LongAgo = ( strtotime( "now" ) - strtotime( $Event[LastHeard] ) );
                 if ($Event[GroupCall] = 1) $Audience = "GROUP";
                 if ($Event[PrivateCall] = 1) $Audience = "PRIVATE";
                 if ($Event[Voice] = 1) $Type = "VOICE";
                 if ($Event[Data] = 1) $Type = "DATA";
                 if ( $i % 2 != 0 ) $RowClass = "odd" ; else  $RowClass = "even" ;
+                if (is_null($Event[$RepeaterCity])) $RepeaterCity = "$Event[RepeaterID]"; else $RepeaterCity = "$Event[RepeaterCity]";
                 $LongAgo = ( strtotime( "now" ) - strtotime( $Repeater[LastHeard] ) ) ;
                 echo "<tr>";
                 echo "<td nowrap class=$RowClass>$Event[StartTime]</td>" ;
+                echo "<td nowrap class=$RowClass>$Duration</td>" ;
                 echo "<td nowrap class=$RowClass>$Event[DmrID]</td>" ;
                 echo "<td nowrap class=$RowClass>$Event[UserCallsign]</td>" ;
                 echo "<td nowrap class=$RowClass>$Event[UserName]</td>" ;
@@ -111,6 +126,10 @@
     </div>
    </div>
   </div>
- <div id="round_bottom"></div> 
+ <div id="footer" class="fixed">
+		<p class="credits">
+            UNDER CONSTRUCTION  UNDER CONSTRUCTION  UNDER CONSTRUCTION  UNDER CONSTRUCTION  UNDER CONSTRUCTION  
+		 </p>				   
+	</div>
 </body>
 </html>
