@@ -31,6 +31,7 @@ while($err == 0) {
        		if(hex(substr($o12,1,1)) & 2) { $VoiceCall = 1; }
 		if($PacketType eq 128){ $GroupCall = 1 };
 		if($PacketType eq 132){ $PrivateCall = 1 }; 	
+        print "$TimeSlot=1$Group=0$Private=0$Final=0$Data=0$Voice=0$Private=0\n";
 		$Query = "INSERT INTO `UserLog` (`Key`, `StartTime`, `EndTime`,`SourceNet`, `PacketType`, `RepeaterID`, `DmrID`, `DestinationID`, `Sequence`, `TimeSlot`, `GroupCall`, `PrivateCall`, `VoiceCall`, `DataCall`) VALUES (CRC32('$Date$SourceID$RepeaterID$Sequence$SourceNet$TimeSlot'),'$DateTime','0000-00-00 00:00:00','$SourceNet', '$PacketType', '$RepeaterID', '$DmrID', '$DestinationID', '$Sequence', '$TimeSlot','$GroupCall','$PrivateCall','$VoiceCall','$DataCall') ON DUPLICATE KEY UPDATE EndTime='$DateTime';";
 		$Statement = $SqlConn->prepare($Query);
                 $Statement->execute();

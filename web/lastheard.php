@@ -71,7 +71,8 @@
                         UserLog.GroupCall       AS GroupCall,
                         UserLog.PrivateCall     AS PrivateCall,
                         UserLog.VoiceCall       AS VoiceCall,
-                        UserLog.DataCall        AS DataCall
+                        UserLog.DataCall        AS DataCall,
+                        Talkgroup.Assignment    AS Talkgroup
                     FROM 
                         UserLog 
                     LEFT JOIN 
@@ -82,6 +83,10 @@
                         Repeater 
                     ON 
                         (UserLog.RepeaterID = Repeater.DmrID )
+                        LEFT JOIN
+                        Talkgroup
+                    ON
+                        (UserLog.DestinationID = Talkgroup.DmrID)
                     GROUP BY
                         DmrID
                     ORDER BY 
@@ -92,6 +97,7 @@
         $Result = mysql_query( $Query ) or die( mysql_errno . " " . mysql_error() ) ;
         while ( $Event = mysql_fetch_array( $Result ) ) {
                 $Audience = ""; $Type="";
+                if (($Event[Talkgroup]=="")) {$Talkgroup = $Event[DestinationID];} else {$Talkgroup =$Event[Talkgroup]; }
                 $LongAgo = ( strtotime( "now" ) - strtotime( $Event[LastHeard] ) );
                 if ($Event[GroupCall] = 1) $Audience = "GROUP";
                 if ($Event[PrivateCall] = 1) $Audience = "PRIVATE";
@@ -109,7 +115,7 @@
                 echo "<td nowrap class=$RowClass>$Event[RepeaterCity]</td>" ;
                 echo "<td nowrap class=$RowClass>$Event[RepeaterID]</td>" ;
                 echo "<td nowrap class=$RowClass>$Event[RepetaerCallsign]</td>" ;
-                echo "<td nowrap class=$RowClass>$Event[DestinationID]</td>" ;
+                echo "<td nowrap class=$RowClass>$Talkgroup</td>" ;
                 echo "<td nowrap class=$RowClass>$Event[SourceNet]</td>" ;
                 echo "<td nowrap class=$RowClass>$Event[TimeSlot]</td>" ;
                 echo "<td nowrap class=$RowClass>$Audience</td>" ;

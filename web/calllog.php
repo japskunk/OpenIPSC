@@ -71,13 +71,18 @@
                         UserLog.GroupCall       AS GroupCall,
                         UserLog.PrivateCall     AS PrivateCall,
                         UserLog.VoiceCall       AS VoiceCall,
-                        UserLog.DataCall        AS DataCall
+                        UserLog.DataCall        AS DataCall,
+                        Talkgroup.Assignment    AS Talkgroup
                     FROM 
                         UserLog 
                     LEFT JOIN 
                         User 
                     ON 
                         (UserLog.DmrID = User.DmrID ) 
+                    LEFT JOIN
+                        Talkgroup
+                    ON
+                        (UserLog.DestinationID = Talkgroup.DmrID)
                     LEFT JOIN 
                         Repeater 
                     ON 
@@ -95,6 +100,7 @@
                 if ($Event[Voice] = 1) $Type = "VOICE";
                 if ($Event[Data] = 1) $Type = "DATA";
                 if ( $i % 2 != 0 ) $RowClass = "odd" ; else  $RowClass = "even" ;
+                if (($Event[Talkgroup]=="")) {$Talkgroup = $Event[DestinationID];} else {$Talkgroup =$Event[Talkgroup]; }
                 $LongAgo = ( strtotime( "now" ) - strtotime( $Repeater[LastHeard] ) ) ;
                 echo "<tr>";
                 echo "<td nowrap class=$RowClass>$Event[StartTime]</td>" ;
@@ -104,7 +110,7 @@
                 echo "<td nowrap class=$RowClass>$Event[RepeaterCity]</td>" ;
                 echo "<td nowrap class=$RowClass>$Event[RepeaterID]</td>" ;
                 echo "<td nowrap class=$RowClass>$Event[RepetaerCallsign]</td>" ;
-                echo "<td nowrap class=$RowClass>$Event[DestinationID]</td>" ;
+                echo "<td nowrap class=$RowClass>$Talkgroup</td>" ;
                 echo "<td nowrap class=$RowClass>$Event[SourceNet]</td>" ;
                 echo "<td nowrap class=$RowClass>$Event[TimeSlot]</td>" ;
                 echo "<td nowrap class=$RowClass>$Audience</td>" ;
