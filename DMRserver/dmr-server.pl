@@ -19,7 +19,6 @@ while($err == 0) {
         	if(hex(substr($TimeSlotHex,1,1)) & 2) { $Ts2Online = 1; }
 	        if(hex(substr($TimeSlotHex,1,1)) & 8) { $Ts1Online = 1; }
     		$Query = "INSERT INTO `RepeaterLog` (`DmrID`, `SourceNet`, `DateTime`, `Ts1Online`, `Ts2Online`, `PacketType`, `TimeSlotRaw`) VALUES ('$DmrID','$SourceNet','$DateTime','$Ts1Online','$Ts2Online','$PacketType','$TimeSlotHex');";
-		 print "$Query\n";
 		$Statement = $SqlConn->prepare($Query);
                 $Statement->execute();
 	}
