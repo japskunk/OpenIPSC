@@ -16,18 +16,6 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-$time = microtime();
-$time = explode(' ', $time);
-$time = $time[1] + $time[0];
-$start = $time;
-$cachefile = 'cache/cache.html';
-$cachetime = 60; //CACHE PAGE FOR 60 SECONDS
-if (file_exists($cachefile) && time() - $cachetime < filemtime($cachefile)) {
-    include($cachefile);
-    echo "<!-- Cached copy, generated ".date('H:i', filemtime($cachefile))." -->\n";
-    exit;
-}
-ob_start();
 ?>
 <html>
 <body>
@@ -64,19 +52,28 @@ ob_start();
                     <th>&nbsp;&nbsp;SLOT 2&nbsp;&nbsp;</th>
                 <tr>
             <?
-            $Query =    "SELECT Repeater.DmrID AS DmrID, Role, Country, City, State, Frequency, Offset, Trustee, LastHeard, Repeater.Publish, Override, OverrideOnline, Ts1Online, Ts2Online, OverrideTs1Online, OverrideTs2Online, Network.Description FROM `Repeater` LEFT JOIN Network ON Repeater.DmrID = Network.DmrID WHERE Repeater.Publish = '1' AND SourceNet = $SourceNet[DmrID] Group BY Repeater.DmrID ORDER BY Country, State, City" ;
+    //RepeaterLog ON (Repeater.DmrID = RepeaterLog.DmrID)
+    //LEFT OUTER JOIN Network ON Repeater.DmrID = Network.DmrID
+            $Query = "SELECT Repeater.DmrID AS DmrID, Repeater.Role AS Role, Repeater.Country AS 
+Country, Repeater.City AS City, Repeater.State AS State, Repeater.Frequency
+ AS Frequency, Repeater.Offset AS Offset, Repeater.Trustee AS Trustee, 
+Repeater.Publish AS Publish, Repeater.Override AS Override, Repeater.OverrideOnline
+ AS OverrideOnline, Repeater.OverrideTs1Online AS OverrideTs1Online, Repeater
+.OverrideTs2Online AS OverrideTs2Online, Network.Description AS Description, 
+A.DateTime AS LastHeard, A.Ts1Online AS Ts1Online, A.Ts2Online AS Ts2Online
+ FROM Repeater LEFT JOIN (SELECT t1.* FROM RepeaterLog AS t1 LEFT OUTER JOIN 
+RepeaterLog AS t2 ON( t1.DmrID = t2.DmrID AND t1.DateTime < t2.DateTime ) 
+Where t2.DmrID IS NULL) A ON A.DmrID = Repeater.DmrID LEFT JOIN Network ON ( 
+Repeater.DmrID = Network.DmrID ) WHERE Repeater.Publish = '1' AND Repeater.SourceNet
+ = '$SourceNet[DmrID]' GROUP BY DmrID; ";
             mysql_query( $Query ) or die( "MYSQL ERROR:" . mysql_error() ) ;
             $Result2 = mysql_query( $Query ) or die( mysql_errno . " " . mysql_error() ) ;
             $i = 1 ;
             while ( $Repeater = mysql_fetch_array( $Result2 ) ) {
-        
-                if ( $i % 2 != 0 ) $RowClass = "odd" ;                          
-                else  $RowClass = "even" ;
-		
-                if ( $Repeater[Role]==1) $RowClass = "master" ;   
-                 
-                if ( $Repeater[Country] == '' ) {                               
-                    $Country = $Repeater[DmrID] ;
+               
+                if ( $i % 2 != 0 ) $RowClass = "odd" ; else  $RowClass = "even" ;
+                if ( $Repeater[Role]==1) $RowClass = "master" ;                   
+                if ( $Repeater[Country] == '' ) { $Country = $Repeater[DmrID] ;
                 } else {
                     $Country = $Repeater[Country] ;
                 };
@@ -106,7 +103,7 @@ ob_start();
                 };            
                 if ( $Repeater[Publish] == 1 ) {
 
-			echo "<td nowrap class=$RowClass>$Country</td>" ;
+			echo "<td nowrap class=$RowClass>$Repeater[Country]</td>" ;
 			echo "<td nowrap class=$RowClass>$Repeater[State]</td>" ;
 			echo "<td nowrap class=$RowClass>$City </td>" ;
 			echo "<td nowrap class=$RowClass>$Frequency</td>" ;
@@ -153,18 +150,14 @@ ob_start();
 		}
 		echo "</tr>" ;
 		$i++ ;
-	}
+    }
 	echo "</table>" ;
 	echo "<br />" ;
+    
     }?>
     </div>
    </div>
   </div>
  <div id="round_bottom"></div> 
 </body>
-</html><?
-$cached = fopen($cachefile, 'w');
-fwrite($cached, ob_get_contents());
-fclose($cached);
-ob_end_flush(); 
-?>
+</html>
