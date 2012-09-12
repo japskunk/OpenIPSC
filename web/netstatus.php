@@ -21,7 +21,6 @@
 <body>
 <link rel="stylesheet" href="netstatus.css" type="text/css">
 <br />
-<div id="round_top"></div>
 <div id="content" class="fixed">
     <div id="maincontent">
         <h2>DMR Network Status</h2>
