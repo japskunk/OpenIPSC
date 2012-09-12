@@ -8,6 +8,7 @@ $err = 0;
 while($err == 0) {
 	$SqlConn ||= DBI->connect("DBI:mysql:database=dmrdb:host=localhost", dmruser) or die "Can't connect to database: $DBI::errstr\n";
 	$Frame = $socket->getline();
+	print $Frame."\n";
 	($Date,$Time,$SourceNet,$PacketType) = split(/ /,$Frame);
 	$DateTime = $Date . " " . $Time;
   	$PacketType = hex($PacketType);
@@ -25,21 +26,27 @@ while($err == 0) {
 		$Statement = $SqlConn->prepare($Query);
                 $Statement->execute();
 	}
-	if (($PacketType eq 128) || ($PacketType eq 129) || ($PacketType eq 132)) {	#MOTOROLA VOICE / DATA
-		($Repeater,$Sequence,$DmrID,$DestinationID,$o12,$o13,$o14,$o15,$o16,$o17,$o18) = split(/ /,substr($Frame,32));		
+	if (($PacketType ge 128) && ($PacketType le 132)) {	#MOTOROLA VOICE / DATA
+		($RepeaterID,$Sequence,$DmrID,$DestinationID,$o12,$o13,$o14,$o15,$o16,$o17,$o18) = split(/ /,substr($Frame,32));		
 		$TimeSlot=1;$Final=0;$Data=0;$Voice=0;$Private=0;
         	if(hex(substr($o17,0,1)) & 2) { $TimeSlot = 2; }
-	        if(hex(substr($o17,0,1)) & 4) { $Final =  $o17 & 4;}
+	        if(hex(substr($o17,0,1)) & 4) { $Final = 1;}
 	        if(hex(substr($o12,1,1)) & 1) { $Data = 1; }
        		if(hex(substr($o12,1,1)) & 2) { $Voice = 1; }
 		if($PacketType eq 128){ $Group = 1 };
 		if($PacketType eq 132){ $Private = 1 }; 	
-		print "Oct17: $o17 Oct12: $o12 TS:$TimeSlot DATA:$Data Voice:$Voice Private:$Private Sequence:$Sequence \n";
-		$Query = "INSERT INTO UserLog (DateTime, SourceNet, PacketType, RepeaterID, DmrID, DestinationID, Sequence, TimeSlot, GroupCall, PrivateCall, DataCall, Raw) VALUES('$DateTime','$SourceNet', '$PacketType', '$RepeaterID', '$DmrID', '$DestinationID', '$Sequence', '$TimeSlot', '$GroupCall','$PrivateCall','$DataCall','$Raw');";
+#		print "Oct17: $o17 Oct12: $o12 TS:$TimeSlot DATA:$Data Voice:$Voice Private:$Private Group:$Group Sequence:$Sequence Maker:$Final Source: $DmrID Dest: $DestinationID Repeater: $RepeaterID\n";
+		$Query = "INSERT INTO UserLog (Key, StartTime, SourceNet, PacketType, RepeaterID, DmrID, DestinationID, Sequence, TimeSlot, GroupCall, PrivateCall, DataCall, Raw) VALUES CRC32('$SourceID$RepeaterID$Sequence$SourceNet'),'$DateTime','$SourceNet', '$PacketType', '$RepeaterID', '$DmrID', '$DestinationID', '$Sequence', '$TimeSlot', '$GroupCall','$PrivateCall','$DataCall','$Raw') ON DUPLICATE KEY UPDATE EndTime='$DateTime';";
+		print "QUERY: $Query\n";
 		$Statement = $SqlConn->prepare($Query);
                 $Statement->execute();
-	}		
+	}
+
+
+
+	
 }
+
 $dbh->close;
 $socket->close();
 exit;
