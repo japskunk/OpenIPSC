@@ -120,7 +120,6 @@
 		$i++ ;	
 		}
 		echo "</tr>" ;
-		
 	echo "</table>" ;
 	echo "<br />" ;?>
     
