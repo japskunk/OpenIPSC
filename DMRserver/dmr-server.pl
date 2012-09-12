@@ -12,7 +12,7 @@ while($err == 0) {
 	($Date,$Time,$SourceNet,$PacketType) = split(/ /,$Frame);
 	$DateTime = $Date . " " . $Time;
   	$PacketType = hex($PacketType);
-	if (($PacketType ge 150) && ($PacketType le 153)){	#MOTOROLA HEARDBEAT
+	if (($PacketType ge 150) && ($PacketType le 153)){	#MOTOROLA HEARTBEAT
 		($DmrID,$TimeSlotHex) = split(/ /,substr($Frame,32));
 		$Ts1Online = "0";
 		$Ts2Online = "0";
