@@ -33,18 +33,23 @@ ob_start();*/
 <body>
 <link rel="stylesheet" href="netstatus.css" type="text/css">
 <div id="header" class="fixed">
+         <div class="logo">                
+                <img src="logo.png" border="0" width="300" height="75" alt="logo" />
+                </div>
+			</a>
 		<div class="nav">
 			<ul>
 			  <li><a href="netstatus.php" class="active" >NetStatus</a></li>
               <li><a href="lastheard.php" >LastHeard</a></li>		
 			  <li><a href="calllog.php">Call Log</a></li>
-			  </div>
-			  </ul>
+  			</ul>
+              </div>
+			  
 		</div>
 	</div>
 <div id="content" class="fixed">
     <div id="maincontent">
-        <h2>DMR Network Status</h2>
+        <h2>Network Status</h2>
         <? 
         include '/usr/local/include/dmrdb.inc' ;
         date_default_timezone_set( 'UTC' ) ;

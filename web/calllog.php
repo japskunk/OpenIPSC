@@ -21,6 +21,10 @@
     <body>
         <link rel="stylesheet" href="netstatus.css" type="text/css">
         <div id="header" class="fixed">
+            <div class="logo">                
+                <img src="logo.png" border="0" width="300" height="75" alt="logo" />
+			</a>
+		</div>
             <div class="nav">
                 <ul>
                     <li><a href="netstatus.php">NetStatus</a></li>
@@ -31,7 +35,7 @@
         </div>
         <div id="content" class="fixed">
             <div id="maincontent">
-                <h2>DMR Call Log</h2>
+                <h2>Call Log</h2>
                 <table  width="100%" border="0" cellspacing="0" >
                 <tr>
                     <th>Date</th>

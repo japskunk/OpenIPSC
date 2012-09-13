@@ -20,6 +20,9 @@
     <body>
     <link rel="stylesheet" href="netstatus.css" type="text/css">
     <div id="header" class="fixed">
+        <div class="logo">                
+            <img src="logo.png" border="0" width="300" height="75" alt="logo" /></div>
+		</a>
         <div class="nav">
             <ul>
                 <li>
@@ -35,8 +38,10 @@
         </div>
     </div>
     <div id="content" class="fixed">
+    Under Construction - Under Construction -  Under Construction - Under Construction - Under Construction 
         <div id="maincontent">
-            <h2>DMR Last Heard List</h2>
+            <h2>Last Heard List</h2>
+            
             <table  width="100%" border="0" cellspacing="0" >
                 <tr>
                     <th>Date</th>
