@@ -82,7 +82,7 @@ AND a.DateTime = m.LastHeard";
                     <th>&nbsp;&nbsp;SLOT 2&nbsp;&nbsp;</th>
                 <tr>
             <?
-        $Query = "SELECT Repeater.DmrID              AS DmrID, 
+        $Query = "SELECT Repeater.DmrID AS DmrID, 
        Repeater.Role               AS Role, 
        Repeater.Country            AS Country, 
        Repeater.City               AS City, 

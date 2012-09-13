@@ -60,7 +60,6 @@ $Result = mysql_query( $Query ) or die( mysql_errno . " " . mysql_error() ) ;
 while ( $Event = mysql_fetch_array( $Result ) ) {
     $Audience = "" ; $Type = "" ;
 	$Talkgroup =   (is_null($Event[Talkgroup])?$Event[DestinationID]:$Event[Talkgroup]);
-	$LongAgo =     (strtotime("now") - strtotime($Event[LastHeard]));
     $Audience=     ($Event[GroupCall] == 1?"GROUP":"PRIVATE");
 	$Type =        ($Event[VoiceCall] == 1?"VOICE":"DATA");
 	$RowClass =    (($i % 2 != 0)?"odd":"even");
@@ -81,6 +80,7 @@ while ( $Event = mysql_fetch_array( $Result ) ) {
     $i++ ;
 } ?>
             </table>
+            <br />
         </div>
     </div>
     <div id="footer" class="fixed">
