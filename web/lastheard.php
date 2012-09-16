@@ -34,11 +34,13 @@
                 <li>
                     <a href="calllog.php">Call Log</a>
                 </li>
+                <li>
+                    <a href="users.php">Users</a>
+                </li>
             </ul>
         </div>
     </div>
-    <div id="content" class="fixed">
-    Under Construction - Under Construction -  Under Construction - Under Construction - Under Construction 
+    <div id="content" class="fixed"> 
         <div id="maincontent">
             <h2>Last Heard List</h2>
             
@@ -59,27 +61,66 @@ include '/usr/local/include/dmrdb.inc' ;
 date_default_timezone_set( 'UTC' ) ;
 $Date = date( 'l F jS, Y', time() ) ;
 $DateTime = date( 'd M y, H:i:s', time() ) ;
-$Query = "SELECT UserLog.StartTime AS StartTime, UserLog.DmrID AS DmrID, User.Callsign AS UserCallsign, Network.Description AS NetworkDescription, User.Name AS UserName, UserLog.RepeaterID AS RepeaterID, Repeater.Short AS Short, Repeater.City AS RepeaterCity, Repeater.CallSign AS RepeaterCallsign, UserLog.DestinationID   AS DestinationID, UserLog.SourceNet AS SourceNet, UserLog.TimeSlot AS TimeSlot, UserLog.GroupCall AS GroupCall, UserLog.PrivateCall AS PrivateCall, UserLog.VoiceCall AS VoiceCall, UserLog.DataCall AS DataCall, Talkgroup.Assignment AS Talkgroup FROM UserLog LEFT JOIN Network ON (UserLog.SourceNET = Network.DmrID) LEFT JOIN User ON (UserLog.DmrID = User.DmrID ) LEFT JOIN Repeater ON (UserLog.RepeaterID = Repeater.DmrID ) LEFT JOIN Talkgroup ON (UserLog.DestinationID = Talkgroup.DmrID) GROUP BY DmrID ORDER BY StartTime DESC LIMIT 30;" ;
+
+    
+$Query = "
+SELECT 
+    `t`.`DmrID`
+   ,`t`.`StartTime`
+   ,`t`.`DestinationID` 
+   ,`t`.`RepeaterID`
+   ,`t`.`SourceNet`
+   ,`t`.`TimeSlot`
+   ,`t`.`GroupCall`
+   ,`t`.`PrivateCall`
+   ,`t`.`VoiceCall`
+   ,`t`.`DataCall`
+   ,`User`.`Callsign` 		AS `UserCallsign`
+   ,`User`.`Name`     		AS `UserName`
+   ,`Network`.`Description`     AS `NetworkDescription`
+   ,`Repeater`.`Short`          AS `Short`
+   ,`Repeater`.`City`           AS `RepeaterCity`
+   ,`Repeater`.`CallSign`       AS `RepeaterCallsign`
+   ,`Talkgroup`.`Assignment`    AS `Talkgroup`
+FROM UserLog t
+LEFT JOIN   `User` 
+ON          `t`.`DmrID` = `User`.`DmrID`
+LEFT JOIN   `Network`
+ON          `t`.`SourceNet` = `Network`.`DmrID`
+LEFT JOIN   `Repeater` 
+ON          `t`.`RepeaterID` = `Repeater`.`DmrID`
+LEFT JOIN   `Talkgroup` 
+ON          `t`.`DestinationID` = `Talkgroup`.`DmrID`
+JOIN (
+	SELECT 		MAX( StartTime ) AS StartTime, DmrID
+	FROM 		UserLog
+	GROUP BY 	DmrID
+	)temp ON temp.DmrID = t.DmrID
+AND temp.StartTime = t.StartTime
+WHERE `Repeater`.`DmrID` IS NOT NULL
+ORDER BY  `t`.`StartTime` DESC";
+
 mysql_query( $Query ) or die( "MYSQL ERROR:" . mysql_error() ) ;
 $Result = mysql_query( $Query ) or die( mysql_errno . " " . mysql_error() ) ;
 while ( $Event = mysql_fetch_array( $Result ) ) {
     $Audience = "" ; $Type = "" ;
 	$Talkgroup =   (is_null($Event[Talkgroup])?$Event[DestinationID]:$Event[Talkgroup]);
+    $UserName =    (is_null($Event[UserName]))?$Event[DmrID]:$Event[UserCallsign].str_repeat('&nbsp',(7-strlen($Event[UserCallsign]))).$Event[UserName];
     $Audience=     ($Event[GroupCall] == 1?"GROUP":"PRIVATE");
 	$Type =        ($Event[VoiceCall] == 1?"VOICE":"DATA");
 	$RowClass =    (($i % 2 != 0)?"odd":"even");
-	$Repeater =    (is_null($Event[RepeaterCity]))?$Event[Short]:$Event[RepeaterCallsign].str_repeat('&nbsp',(7-strlen($Event[RepeaterCallsign]))).$Event[RepeaterCity];
+	$Repeater =    (is_null($Event[RepeaterCity]))?$Event[RepeaterID]:$Event[RepeaterCallsign].str_repeat('&nbsp',(7-strlen($Event[RepeaterCallsign]))).$Event[RepeaterCity];
 	$LongAgo =     (duration(strtotime("now")-strtotime($Event[StartTime])));?>
                 <tr>
                     <td nowrap class=<?=$RowClass?>><?=$Event[StartTime]?></td>
                     <td nowrap class=<?=$RowClass?>><?=$LongAgo?></td>
-                    <td nowrap class=<?=$RowClass?>><?=$Event[UserCallsign].str_repeat('&nbsp',(7-strlen($Event[UserCallsign]))).$Event[UserName]?></td>
+                    <td nowrap class=<?=$RowClass?>><?=$UserName?></td>
                     <td nowrap class=<?=$RowClass?>><?=$Repeater?></td>
                     <td nowrap class=<?=$RowClass?>><?=$Talkgroup?></td>
                     <td nowrap class=<?=$RowClass?>><?=$Event[TimeSlot]?></td>
                     <td nowrap class=<?=$RowClass?>><?=$Event[NetworkDescription]?></td>
-                    <td nowrap class=<?=$RowClass?>><?=$Audience?></td>
-                    <td nowrap class=<?=$RowClass?>><?=$Type?></td>
+                    <td nowrap class=<?=$RowClass?>><?= "" ?></td>
+                    <td nowrap class=<?=$RowClass?>><?= "" ?></td>
                 </tr>
                 <?
     $i++ ;

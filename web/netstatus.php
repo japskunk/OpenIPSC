@@ -42,6 +42,9 @@ ob_start();*/
 			  <li><a href="netstatus.php" class="active" >NetStatus</a></li>
               <li><a href="lastheard.php" >LastHeard</a></li>		
 			  <li><a href="calllog.php">Call Log</a></li>
+              <li>
+                    <a href="users.php" >Users</a>
+                </li>
   			</ul>
               </div>
 			  

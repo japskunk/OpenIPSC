@@ -30,6 +30,9 @@
                     <li><a href="netstatus.php">NetStatus</a></li>
                     <li><a href="lastheard.php">LastHeard</a></li>		
                     <li><a href="calllog.php"class="active" >Call Log</a></li>
+                    <li>
+                    <a href="users.php" >Users</a>
+                </li>
                 </ul>
             </div>
         </div>
@@ -75,12 +78,12 @@ while ( $Event = mysql_fetch_array( $Result ) ) {
                 <td nowrap class=<?=$RowClass?>><?=$Event[UserName]?></td>
                 <td nowrap class=<?=$RowClass?>><?=$Repeater?></td>
                 <td nowrap class=<?=$RowClass?>><?=$Event[RepeaterID]?></td>
-                <td nowrap class=<?=$RowClass?>><?=$Event[RepetaerCallsign]?></td>
+                <td nowrap class=<?=$RowClass?>><?=$Event[RepeaterCallsign]?></td>
                 <td nowrap class=<?=$RowClass?>><?=$Talkgroup?></td>
                 <td nowrap class=<?=$RowClass?>><?=$Event[SourceNet]?></td>
                 <td nowrap class=<?=$RowClass?>><?=$Event[TimeSlot]?></td>
-                <td nowrap class=<?=$RowClass?>><?=$Audience?></td>
-                <td nowrap class=<?=$RowClass?>><?=$Type?></td>
+                <td nowrap class=<?=$RowClass?>><?=""?></td>
+                <td nowrap class=<?=$RowClass?>><?=""?></td>
             </tr>
             <?
     $i++ ;	
