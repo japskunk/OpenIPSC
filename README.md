@@ -2,15 +2,19 @@ OpenIPSC
 ========
 Utilities for DMR radio networks
 
-dmrmon-remote.c     - promiscisuly listenes to a interface and pass DMR traffic to dmrmon-server
+DMRmonitor - promiscisuly listenes to a interface and pass DMR traffic to dmrmon-server. NOT FUNCTIONAL YET.
 
-dmrmon-server.c    - listen for dmrmon-remote data, save to database. 
+DMRserver  - listen for dmrmon-remote data, save to database. CURRENTLY WORKS WITH DL5DI modified 'windump'
 
-dmrdb.mysql       - mysql database 
+sql        - mysql database structure dumps
 
-DmrMarcRip.php    - php command line script that gets repeater, users, and talkgroup information from the dmr-marc website.
+scripts    - command line scripts
 
-NetStatus.php     - Display the status of the network in a nice webpage
+web        - call log, last heard, and net status web pages. (still in development)
+
+pcap       - wireshark capture files
+
+
 
 README.motorola   - Information on mototrbo IPSC protocol 
 
