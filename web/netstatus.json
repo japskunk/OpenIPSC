@@ -1,0 +1,131 @@
+<?php 
+$time = microtime();
+$time = explode(' ', $time);
+$time = $time[1] + $time[0];
+$start = $time;
+$cachefile = 'cache.json';
+$cachetime = 60; //CACHE PAGE FOR 60 SECONDS
+if (file_exists($cachefile) && time() - $cachetime < filemtime($cachefile)) {
+    include($cachefile);
+    exit;
+}
+ob_start();
+header( 'Content-Type: application/json; charset=utf-8' ) ;
+include '/home/kd8eyf/include/dmrdb.inc' ;
+error_reporting( E_ERROR | E_WARNING | E_PARSE ) ;
+date_default_timezone_set( 'UTC' ) ;
+$Repeater = array() ;
+$Query = "SELECT a.DmrID, a.DateTime, a.Ts1Online, a.Ts2Online
+FROM ( SELECT DmrID, MAX(DateTime) AS LastHeard FROM RepeaterLog GROUP BY DmrID) AS m 
+INNER JOIN RepeaterLog AS a
+ON a.DmrID = m.DmrID
+AND a.DateTime = m.LastHeard";
+        $Result = mysql_query( $Query ) or die( mysql_errno . " " . mysql_error() ) ;
+        while ( $Row = mysql_fetch_array( $Result ) ) {
+            $LastHeard["$Row[DmrID]"][DateTime] = $Row[DateTime] ; 
+            $LastHeard["$Row[DmrID]"][Ts1Online] = $Row[Ts1Online] ;
+            $LastHeard["$Row[DmrID]"][Ts2Online] = $Row[Ts2Online] ;}  
+$Query = "SELECT * FROM  `Network` WHERE Network.Publish = '1' Group By DmrID ORDER BY DmrID" ;
+mysql_query( $Query ) or die( "MYSQL ERROR:" . mysql_error() ) ;
+$Result = mysql_query( $Query ) or die( mysql_errno . " " . mysql_error() ) ;
+while ( $Row = mysql_fetch_array( $Result ) ) {
+	$Network["$Row[DmrID]"][Description] = $Row[1] ; }
+foreach ( $Network as $NetworkID => $DmrID ) {
+	$Repeater["$NetworkID"][Description] = $Network["$Row[DmrID]"][Description];
+	$Query = "SELECT Repeater.DmrID AS DmrID, Role, Country, City, State, Frequency, Short, Offset, Trustee, `Repeater`.`lat`,`Repeater`.`long`, Repeater.Publish, Override, OverrideOnline, Ts1Online, Ts2Online, OverrideTs1Online, OverrideTs2Online, Network.Description FROM `Repeater` LEFT JOIN Network ON Repeater.DmrID = Network.DmrID WHERE Repeater.Publish = '1' AND SourceNet = '$NetworkID' Group BY Repeater.DmrID ORDER BY Country, State, City" ;
+	mysql_query( $Query ) or die( "MYSQL ERROR:" . mysql_error() ) ;
+	$Result = mysql_query( $Query ) or die( mysql_errno . " " . mysql_error() ) ;
+	while ( $Row = mysql_fetch_array( $Result ) ) {
+		$Online = 0 ;
+		$Ts1Linked = 0 ;
+		$Ts2Linked = 0 ;
+       $LongAgo = ( strtotime( "now" ) - strtotime( $LastHeard["$Row[DmrID]"][DateTime] ) ) ;
+       $Ts1Online = $LastHeard["$Row[DmrID]"][Ts1Online];
+       $Ts2Online = $LastHeard["$Row[DmrID]"][Ts2Online];
+       
+		if ( $LongAgo > 120 ) {
+			$Online = 0 ;
+			$Ts1Linked = 0 ;
+			$Ts2Linked = 0 ;
+            if ($Row[LastHeard] == "0000-00-00 00:00:00")
+                {
+                    $LongAgo = "NEVER";
+                } else {
+                    $LongAgo = duration($LongAgo);
+                    };
+		} else {
+			$Online = 1 ;
+			if ( $Row[Ts1Online] == 1 ) {
+				$Ts1Linked = 1 ;
+			}
+			;
+			if ( $Row[Ts2Online] == 1 ) {
+				$Ts2Linked = 1 ;
+			};
+		}
+		if ( $Row[Override] == 1 ) {
+			if ( $Row[OverrideOnline] == 1 ) {
+				$Online = 1 ;
+			} else {
+				$Online = 0 ;
+			}
+			if ( $Row[OverrideTs1Online] == 1 ) {
+				$Ts1Linked = 1 ;
+			} else {
+				$Ts1Linked = 0 ;
+			}
+			if ( $Row[OverrideTs2Online] == 1 ) {
+				$Ts2Linked = 1 ;
+			} else {
+				$Ts2Linked = 0 ;
+			}
+		}
+        
+        
+		$Repeater["$NetworkID"]["$Row[DmrID]"][Role] = $Row[Role] ;
+		$Repeater["$NetworkID"]["$Row[DmrID]"][Country] = $Row[Country] ;
+		$Repeater["$NetworkID"]["$Row[DmrID]"][State] = $Row[State] ;
+		$Repeater["$NetworkID"]["$Row[DmrID]"][City] = $Row[City] ;
+		$Repeater["$NetworkID"]["$Row[DmrID]"][Short] = $Row[Short] ;
+		$Repeater["$NetworkID"]["$Row[DmrID]"][Frequency] = $Row[Frequency] ;
+		$Repeater["$NetworkID"]["$Row[DmrID]"][Offset] = $Row[Offset] ;
+		$Repeater["$NetworkID"]["$Row[DmrID]"][Owner] = $Row[Trustee] ;
+		$Repeater["$NetworkID"]["$Row[DmrID]"][Lat] = $Row[lat] ;
+		$Repeater["$NetworkID"]["$Row[DmrID]"][Long] = $Row[long] ;
+		$Repeater["$NetworkID"]["$Row[DmrID]"][Online] = $Online ;
+        $Repeater["$NetworkID"]["$Row[DmrID]"][LongAgo] = $LongAgo ;
+		$Repeater["$NetworkID"]["$Row[DmrID]"][Ts1Linked] = $Ts1Linked ;
+		$Repeater["$NetworkID"]["$Row[DmrID]"][Ts2Linked] = $Ts2Linked ;
+        $Repeater["$NetworkID"][Description]=$Network[$NetworkID][Description];
+        
+//print "Network id:".$NetworkID."</br>";
+
+	}
+
+}
+
+echo json_encode( $Repeater ) ; 
+
+function duration( $seconds )
+{
+	$days = floor( $seconds / 60 / 60 / 24 ) ;
+	$hours = $seconds / 60 / 60 % 24 ;
+	$mins = $seconds / 60 % 60 ;
+	$secs = $seconds % 60 ;
+	$duration = '' ;
+	if ( $days > 0 ) {
+		$duration = "$days"."D" ;
+	} elseif ( $hours > 0 ) $duration .= "$hours" . "H" ;
+	if ( $mins > 0 ) $duration .= "$mins" . "M" ;
+	if ( ( $secs > 0 ) && ( $hours < 1 ) && ( $mins < 10 ) ) $duration .= "$secs" .
+			"S" ;
+	$duration = trim( $duration ) ;
+	if ( $duration == null ) $duration = '0' . 'S' ;
+    if ($seconds >= 1000000000) $duration = "NEVER";
+	return $duration ;
+} 
+$cached = fopen($cachefile, 'w');
+fwrite($cached, ob_get_contents());
+fclose($cached);
+ob_end_flush(); 
+?>
