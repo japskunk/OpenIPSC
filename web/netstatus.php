@@ -58,17 +58,7 @@ ob_start();*/
         date_default_timezone_set( 'UTC' ) ;
         $Date = date( 'l F jS, Y', time() ) ;
         $DateTime = date( 'd M y, H:i:s', time() ) ;
-        $Query = "SELECT a.DmrID, a.DateTime, a.Ts1Online, a.Ts2Online
-FROM ( SELECT DmrID, MAX(DateTime) AS LastHeard FROM RepeaterLog GROUP BY DmrID) AS m 
-INNER JOIN RepeaterLog AS a
-ON a.DmrID = m.DmrID
-AND a.DateTime = m.LastHeard";
-        $Result = mysql_query( $Query ) or die( mysql_errno . " " . mysql_error() ) ;
-        while ( $Row = mysql_fetch_array( $Result ) ) {
-            $LastHeard["$Row[DmrID]"][DateTime] = $Row[DateTime] ; 
-            $LastHeard["$Row[DmrID]"][Ts1Online] = $Row[Ts1Online] ;
-            $LastHeard["$Row[DmrID]"][Ts2Online] = $Row[Ts2Online] ;}       
-        $Query = "SELECT `DmrID`, `Description` FROM  `Network` WHERE Network.Publish = '1' Group By DmrID" ;
+       $Query = "SELECT `DmrID`, `Description` FROM  `Network` WHERE Network.Publish = '1' Group By DmrID" ;
         mysql_query( $Query ) or die( "MYSQL ERROR:" . mysql_error() ) ;
         $Result = mysql_query( $Query ) or die( mysql_errno . " " . mysql_error() ) ;
         while ( $SourceNet = mysql_fetch_array( $Result ) ) {
@@ -90,26 +80,33 @@ AND a.DateTime = m.LastHeard";
                     <th>&nbsp;&nbsp;SLOT 2&nbsp;&nbsp;</th>
                 <tr>
             <?
-        $Query = "SELECT Repeater.DmrID AS DmrID, 
-       Repeater.Role               AS Role, 
-       Repeater.Country            AS Country, 
-       Repeater.City               AS City, 
-       Repeater.State              AS State, 
-       Repeater.Frequency          AS Frequency, 
-       Repeater.Offset             AS Offset, 
-       Repeater.Trustee            AS Trustee, 
-       Repeater.Publish            AS Publish, 
-       Repeater.Override           AS Override, 
-       Repeater.OverrideOnline     AS OverrideOnline, 
-       Repeater.OverrideTs1Online  AS OverrideTs1Online, 
-       Repeater.OverrideTs2Online AS OverrideTs2Online, 
-       Network.Description         AS Description
-FROM   Repeater 
-       LEFT JOIN Network 
-              ON ( Repeater.DmrID = Network.DmrID ) 
-WHERE  Repeater.Publish = '1' 
-       AND Repeater.SourceNet = '$SourceNet[DmrID]' 
-GROUP  BY DmrID;";
+            $Query =    "SELECT Repeater.DmrID AS DmrID, 
+                                Role, 
+                                Country, 
+                                City, 
+                                State, 
+                                Frequency, 
+                                Offset, 
+                                Trustee, 
+                                LastHeard, 
+                                Repeater.Publish, 
+                                Override, 
+                                OverrideOnline, 
+                                Ts1Online, 
+                                Ts2Online, 
+                                OverrideTs1Online, 
+                                OverrideTs2Online, 
+                                Network.Description FROM `Repeater` 
+                        LEFT JOIN 
+                                Network ON Repeater.DmrID = Network.DmrID 
+                        WHERE 
+                            Repeater.Publish = '1' 
+                        AND 
+                            SourceNet = $SourceNet[DmrID] 
+                        GROUP BY 
+                            Repeater.DmrID 
+                        ORDER BY 
+                            Country, State, City" ;
             mysql_query( $Query ) or die( "MYSQL ERROR:" . mysql_error() ) ;
             $Result2 = mysql_query( $Query ) or die( mysql_errno . " " . mysql_error() ) ;
             $i = 1 ;
@@ -117,9 +114,9 @@ GROUP  BY DmrID;";
                 if ( $i % 2 != 0 ) $RowClass = "odd" ; else  $RowClass = "even" ;
                 if ( $Repeater[Role]==1) $RowClass = "master" ;                   
                 if ( $Repeater[Publish] == 1 ) {
-                $LongAgo = ( strtotime( "now" ) - strtotime( $LastHeard["$Repeater[DmrID]"][DateTime] ) ) ;
-                $Ts1Online = $LastHeard["$Repeater[DmrID]"][Ts1Online];
-                $Ts2Online = $LastHeard["$Repeater[DmrID]"][Ts2Online];
+                $LongAgo = ( strtotime( "now" ) - strtotime( $Repeater[LastHeard]) ) ;
+                $Ts1Online = $Repeater[Ts1Online];
+                $Ts2Online = $Repeater[Ts1Online];
 			echo "<td nowrap class=$RowClass>$Repeater[Country]</td>" ;
 			echo "<td nowrap class=$RowClass>$Repeater[State]</td>" ;
 			echo "<td nowrap class=$RowClass>$Repeater[City] </td>" ;
@@ -136,7 +133,7 @@ GROUP  BY DmrID;";
 				} else {
 					echo "<td class=offline>LH: ".duration($LongAgo)."</td><td class=offline></td><td class=offline></td>"; }
 			} else {
-                if (($LongAgo > 65)){
+                if (($LongAgo > 120)){
 					echo "<td class=offline>LH: ".duration($LongAgo)."</td><td class=offline></td><td class=offline></td>";
 				} else {
 					echo "<td class=online>ONLINE</td>" ;

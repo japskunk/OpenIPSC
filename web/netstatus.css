@@ -27,6 +27,7 @@ img{ border:none; }
 .networkheader{ border: 0px ; font-size:14px; margin:0; padding:10px 5px; font-size: 16px; color:#424a55; }
 .even { background-color: #E6E6E6; white-space:nowrap; }
 .master { background-color: #ECEFF5; white-space:nowrap; }
+.netcol { background-color: #00EE00; white-space:nowrap; }
 .online { background-color: #00FF00; white-space:nowrap; text-align: center; overflow: hidden; }
 .offline {	background-color: #FF0000; white-space:nowrap; text-align: center; }
 .local { background-color: #00CC00; white-space:nowrap; text-align: center; }

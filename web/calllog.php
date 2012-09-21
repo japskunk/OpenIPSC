@@ -65,8 +65,8 @@ mysql_query( $Query ) or die( "MYSQL ERROR:" . mysql_error() ) ;
 $Result = mysql_query( $Query ) or die( mysql_errno . " " . mysql_error() ) ;
 while ( $Event = mysql_fetch_array( $Result ) ) {
     $Talkgroup =   (is_null($Event[Talkgroup])?$Event[DestinationID]:$Event[Talkgroup]);
-    $Audience=     ($Event[GroupCall] == 1?"GROUP":"PRIVATE");
-	$Type =        ($Event[VoiceCall] == 1?"VOICE":"DATA");
+    IF ($Event[GroupCall] == 1) $Audience = "GROUP";
+    IF ($Event[PrivateCall] == 1) $Audience = "PRIVATE";
 	$RowClass =    (($i % 2 != 0)?"odd":"even");
 	$Repeater =    (is_null($Event[RepeaterCity]))?$Event[Short]:$Event[RepeaterCallsign].str_repeat('&nbsp',(7-strlen($Event[RepeaterCallsign]))).$Event[RepeaterCity];
 	$LongAgo =     (duration(strtotime("now")-strtotime($Event[StartTime])));?>
@@ -82,8 +82,8 @@ while ( $Event = mysql_fetch_array( $Result ) ) {
                 <td nowrap class=<?=$RowClass?>><?=$Talkgroup?></td>
                 <td nowrap class=<?=$RowClass?>><?=$Event[SourceNet]?></td>
                 <td nowrap class=<?=$RowClass?>><?=$Event[TimeSlot]?></td>
-                <td nowrap class=<?=$RowClass?>><?=""?></td>
-                <td nowrap class=<?=$RowClass?>><?=""?></td>
+                <td nowrap class=<?=$RowClass?>><?=$Audience?></td>
+                <td nowrap class=<?=$RowClass?>><?=$Type?></td>
             </tr>
             <?
     $i++ ;	

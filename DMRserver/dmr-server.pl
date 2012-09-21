@@ -78,11 +78,17 @@ while($err == 0) {
                 if(hex(substr($TimeSlotHex,1,1)) & 2) { $Ts2Online = 1; }
                 if(hex(substr($TimeSlotHex,1,1)) & 8) { $Ts1Online = 1; }
                 printf "HB TYP:%s TS1:%s TS2:%s RTD: %08d SRN: %05d\n",$PacketType, $Ts1Online, $Ts2Online, $DmrID, $SourceNet;
-                $Query = "INSERT INTO `RepeaterLog` (`DmrID`, `SourceNet`, `DateTime`, `Ts1Online`, `Ts2Online`, `PacketType`, `TimeSlotRaw`) VALUES ('$DmrID','$SourceNet','$DateTime','$Ts1Online','$Ts2Online','$PacketType','$TimeSlotHex');";
-                $Statement = $SqlConn->prepare($Query);
+                $Query = "INSERT INTO `Network` (`DmrID`,`Description`,`Publish`,`DateTime`) VALUES ('$SourceNet', 'UNKNOWN - $SourceNet', '0', '$DateTime') ON DUPLICATE KEY UPDATE DateTime='$DateTime';";
+		 $Statement = $SqlConn->prepare($Query);
                 $Statement->execute();
+		$Query = "INSERT INTO `RepeaterLog` (`DmrID`, `SourceNet`, `DateTime`, `Ts1Online`, `Ts2Online`, `PacketType`, `TimeSlotRaw`) VALUES ('$DmrID','$SourceNet','$DateTime','$Ts1Online','$Ts2Online','$PacketType','$TimeSlotHex');";
+		$Statement = $SqlConn->prepare($Query);
+                $Statement->execute();
+		$Query = "INSERT INTO `Repeater` (`DmrID`, `SourceNet`, `LastHeard`, `Ts1Online`, `Ts2Online`) VALUES ('$DmrID','$SourceNet','$DateTime','$Ts1Online','$Ts2Online') ON DUPLICATE KEY UPDATE `LastHeard` = '$DateTime', `SourceNet` = '$SourceNet', `Ts1Online` = '$Ts1Online', `Ts2Online` = '$Ts2Online';";
         }
-        if (($PacketType ge 128) && ($PacketType le 132)) {     #MOTOROLA VOICE / DATA
+        	$Statement = $SqlConn->prepare($Query);
+                $Statement->execute();
+	if (($PacketType ge 128) && ($PacketType le 132)) {     #MOTOROLA VOICE / DATA
                 ($RepeaterID,$Sequence,$DmrID,$DestinationID,$Priority,$FlowControlFlags,$CallControlInfo,$ContribSrcID,$PayloadType,$SeqNumber,$TimeStamp,$SyncSrcID,$DataType,$RssiThreshold,$Length,$RssiStatus,$SlotType,$DataSize) = split(/ /,substr($Frame,29));
                 $TimeSlot=1;$Group=0;$Private=0;$Final=0;$Data=0;$Voice=0;$Private=0;$Answer=0;
                 if(hex(substr($CallControlInfo,0,1)) & 2) { $TimeSlot = 2; }
@@ -93,7 +99,10 @@ while($err == 0) {
 		if(hex(substr($Priority,1,1)) & 1) { $Data = "1";}
 		if(hex(substr($Priority,1,1)) & 2) { $Voice = "1";}
 		printf "V/D TS:%s G:%s P:%s F:%s D:%s V:%s A:%s TYP:%s RID:%08d SEQ:%03d DMRID:%08d DST:%08d PRI:%s FCF:%s CCI:%s CSI:%s PLT:%s SQN:%05s TSP:%s SSI:%s DAT:%s RST:%s LEN:%02s RSS:%s SLT:%s DAS:%05s",$TimeSlot,$Group,$Private,$Final,$Data,$Voice,$Answer,$PacketType,$RepeaterID,$Sequence,$DmrID,$DestinationID,$Priority,$FlowControlFlags,$CallControlInfo,$ContribSrcID,$PayloadType,$SeqNumber,$TimeStamp,$SyncSrcID,$DataType,$RssiThreshold,$Length,$RssiStatus,$SlotType,$DataSize;
-                $Query = "INSERT INTO `dmrdb`.`UserLog` (`Key`, `StartTime`, `EndTime`, `SourceNet`, `PacketType`, `RepeaterID`, `DmrID`, `DestinationID`, `Sequence`, `TimeSlot`, `GroupCall`, `PrivateCall`, `VoiceCall`, `DataCall`, `Priority`, `FlowControlFlags`, `CallControlInfo`, `ContribSrcID`, `PayloadType`, `SeqNumber`, `TimeStamp`, `SyncSrcID`, `DataType`, `RssiThreshold`, `Length`, `RssiStatus`, `SlotType`, `DataSize`) VALUES (MD5('$Date$SourceID$RepeaterID$Sequence$SourceNet$TimeSlot'),'$DateTime','0000-00-00 00:00:00','$SourceNet', '$PacketType', '$RepeaterID', '$DmrID', '$DestinationID', '$Sequence', '$TimeSlot','$GroupCall','$PrivateCall','$VoiceCall','$DataCall','$Priority','$FlowControlFlags','$CallControlInfo','$ContribSrcID','$PayloadType','$SeqNumber','$TimeStamp','$SyncSrcID','$DataType','$RssiThreshold','$Length','$RssiStatus','$SlotType','$DataSize') ON DUPLICATE KEY UPDATE EndTime='$DateTime';";
+                $Query = "INSERT INTO `Network` (`DmrID`,`Description`,`Publish`,`DateTime`) VALUES ('$SourceNet', 'UNKNOWN - $SourceNet', '0', '$DateTime') ON DUPLICATE KEY UPDATE DateTime='$DateTime';";
+                $Statement = $SqlConn->prepare($Query);
+                $Statement->execute();
+		$Query = "INSERT INTO `dmrdb`.`UserLog` (`Key`, `StartTime`, `EndTime`, `SourceNet`, `PacketType`, `RepeaterID`, `DmrID`, `DestinationID`, `Sequence`, `TimeSlot`, `GroupCall`, `PrivateCall`, `VoiceCall`, `DataCall`, `Priority`, `FlowControlFlags`, `CallControlInfo`, `ContribSrcID`, `PayloadType`, `SeqNumber`, `TimeStamp`, `SyncSrcID`, `DataType`, `RssiThreshold`, `Length`, `RssiStatus`, `SlotType`, `DataSize`) VALUES (MD5('$Date$SourceID$RepeaterID$Sequence$SourceNet$TimeSlot'),'$DateTime','0000-00-00 00:00:00','$SourceNet', '$PacketType', '$RepeaterID', '$DmrID', '$DestinationID', '$Sequence', '$TimeSlot','$GroupCall','$PrivateCall','$VoiceCall','$DataCall','$Priority','$FlowControlFlags','$CallControlInfo','$ContribSrcID','$PayloadType','$SeqNumber','$TimeStamp','$SyncSrcID','$DataType','$RssiThreshold','$Length','$RssiStatus','$SlotType','$DataSize') ON DUPLICATE KEY UPDATE EndTime='$DateTime';";
                 $Statement = $SqlConn->prepare($Query);
                 $Statement->execute();
         }
