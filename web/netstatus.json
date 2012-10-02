@@ -39,7 +39,6 @@ foreach ( $Network as $NetworkID => $DmrID ) {
        $Ts1Online = $LastHeard["$Row[DmrID]"][Ts1Online];
        $Ts2Online = $LastHeard["$Row[DmrID]"][Ts2Online];
        $Frequency =    (($Row[PublishFrequency] != $Row[Frequency])?$Row[PublishFrequency]:$Row[Frequency]);
-  
 		if ( $LongAgo > 120 ) {
 			$Online = 0 ;
 			$Ts1Linked = 0 ;
@@ -76,9 +75,7 @@ foreach ( $Network as $NetworkID => $DmrID ) {
 			} else {
 				$Ts2Linked = 0 ;
 			}
-		}
-        
-        
+		}       
 		$Repeater["$NetworkID"]["$Row[DmrID]"][Role] = $Row[Role] ;
 		$Repeater["$NetworkID"]["$Row[DmrID]"][Country] = $Row[Country] ;
 		$Repeater["$NetworkID"]["$Row[DmrID]"][State] = $Row[State] ;
@@ -95,15 +92,10 @@ foreach ( $Network as $NetworkID => $DmrID ) {
 		$Repeater["$NetworkID"]["$Row[DmrID]"][Ts1Linked] = $Ts1Linked ;
 		$Repeater["$NetworkID"]["$Row[DmrID]"][Ts2Linked] = $Ts2Linked ;
         $Repeater["$NetworkID"][Description]=$Network[$NetworkID][Description];
-        
-//print "Network id:".$NetworkID."</br>";
-
-	}
+    }
 
 }
-
 echo json_encode( $Repeater ) ; 
-
 function duration( $seconds )
 {
 	$days = floor( $seconds / 60 / 60 / 24 ) ;
