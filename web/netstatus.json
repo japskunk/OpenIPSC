@@ -4,7 +4,7 @@ $time = explode(' ', $time);
 $time = $time[1] + $time[0];
 $start = $time;
 $cachefile = 'cache.json';
-$cachetime = 6; //CACHE PAGE FOR 60 SECONDS
+$cachetime = 60; //CACHE PAGE FOR 60 SECONDS
 if (file_exists($cachefile) && time() - $cachetime < filemtime($cachefile)) {
     include($cachefile);
     exit;
@@ -16,7 +16,6 @@ error_reporting( E_ERROR | E_WARNING | E_PARSE ) ;
 date_default_timezone_set( 'UTC' ) ;
 $Repeater = array() ;
 $Query="SELECT DmrID, LastHeard AS DateTime, Ts1Online, Ts2Online FROM Repeater GROUP BY DmrID ORDER BY `Repeater`.`LastHeard` DESC;";
-//$Query = "SELECT a.DmrID, a.DateTime, a.Ts1Online, a.Ts2Online FROM ( SELECT DmrID, MAX(DateTime) AS LastHeard FROM RepeaterLog GROUP BY DmrID) AS m INNER JOIN RepeaterLog AS a ON a.DmrID = m.DmrID AND a.DateTime = m.LastHeard";
         $Result = mysql_query( $Query ) or die( mysql_errno . " " . mysql_error() ) ;
         while ( $Row = mysql_fetch_array( $Result ) ) {
             $LastHeard["$Row[DmrID]"][DateTime] = $Row[DateTime] ; 
