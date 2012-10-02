@@ -1,6 +1,6 @@
 <?
 //
-//netstatus.phps - fentch network status from remote webserver via json and parse into pretty table 
+//netstatus.phps - fetch network status from remote webserver via json and parse into pretty table 
 //Copyright (C) 2012 David Kierzokwski (kd8eyf@digitalham.info)
 //
 //This program is free software; you can redistribute it and/or
