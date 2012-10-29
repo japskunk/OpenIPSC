@@ -20,7 +20,7 @@ $time = explode(' ', $time);
 $time = $time[1] + $time[0];
 $start = $time;
 $cachefile = 'cache.json';
-$cachetime = 60; //CACHE PAGE FOR 60 SECONDS
+$cachetime = 5; //CACHE PAGE FOR 60 SECONDS
 if (file_exists($cachefile) && time() - $cachetime < filemtime($cachefile)) {
     include($cachefile);
     exit;

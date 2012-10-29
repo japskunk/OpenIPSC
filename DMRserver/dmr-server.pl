@@ -102,10 +102,13 @@ while($err == 0) {
                 $Query = "INSERT INTO `Network` (`DmrID`,`Description`,`Publish`,`DateTime`) VALUES ('$SourceNet', 'UNKNOWN - $SourceNet', '0', '$DateTime') ON DUPLICATE KEY UPDATE DateTime='$DateTime';";
                 $Statement = $SqlConn->prepare($Query);
                 $Statement->execute();
-		$Query = "INSERT INTO `dmrdb`.`UserLog` (`Key`, `StartTime`, `EndTime`, `SourceNet`, `PacketType`, `RepeaterID`, `DmrID`, `DestinationID`, `Sequence`, `TimeSlot`, `GroupCall`, `PrivateCall`, `VoiceCall`, `DataCall`, `Priority`, `FlowControlFlags`, `CallControlInfo`, `ContribSrcID`, `PayloadType`, `SeqNumber`, `TimeStamp`, `SyncSrcID`, `DataType`, `RssiThreshold`, `Length`, `RssiStatus`, `SlotType`, `DataSize`) VALUES (MD5('$Date$SourceID$RepeaterID$Sequence$SourceNet$TimeSlot'),'$DateTime','0000-00-00 00:00:00','$SourceNet', '$PacketType', '$RepeaterID', '$DmrID', '$DestinationID', '$Sequence', '$TimeSlot','$GroupCall','$PrivateCall','$VoiceCall','$DataCall','$Priority','$FlowControlFlags','$CallControlInfo','$ContribSrcID','$PayloadType','$SeqNumber','$TimeStamp','$SyncSrcID','$DataType','$RssiThreshold','$Length','$RssiStatus','$SlotType','$DataSize') ON DUPLICATE KEY UPDATE EndTime='$DateTime';";
+		$Query = "INSERT INTO `dmrdb`.`UserLog` (`Key`, `StartTime`, `EndTime`, `SourceNet`, `PacketType`, `RepeaterID`, `DmrID`, `DestinationID`, `Sequence`, `TimeSlot`, `GroupCall`, `PrivateCall`, `VoiceCall`, `DataCall`, `Priority`, `FlowControlFlags`, `CallControlInfo`, `ContribSrcID`, `PayloadType`, `SeqNumber`, `TimeStamp`, `SyncSrcID`, `DataType`, `RssiThreshold`, `Length`, `RssiStatus`, `SlotType`, `DataSize`) VALUES (MD5('$Date$SourceID$RepeaterID$Sequence$SourceNet$TimeSlot'),'$DateTime','0000-00-00 00:00:00','$SourceNet', '$PacketType', '$RepeaterID', '$DmrID', '$DestinationID', '$Sequence', '$TimeSlot','$Group','$Private','$Voice','$Data','$Priority','$FlowControlFlags','$CallControlInfo','$ContribSrcID','$PayloadType','$SeqNumber','$TimeStamp','$SyncSrcID','$DataType','$RssiThreshold','$Length','$RssiStatus','$SlotType','$DataSize') ON DUPLICATE KEY UPDATE EndTime='$DateTime';";
                 $Statement = $SqlConn->prepare($Query);
                 $Statement->execute();
-        }
+        	$Query = "INSERT INTO `dmrdb`.`LastHeard` (`DmrID`,`StartTime`,`SourceNet`,`TimeSlot`,`RepeaterID`,`DestinationID`) VALUES('$DmrID','$DateTime','$SourceNet','$TimeSlot','$RepeaterID','$DestinationID') ON DUPLICATE KEY UPDATE StartTime='$DateTime', SourceNet='$SourceNet', TimeSlot='$TimeSlot', RepeaterID='$RepeaterID', DestinationID='$DestinationID';"; 
+		$Statement = $SqlConn->prepare($Query);
+		$Statement ->execute();
+	}
 }
 $dbh->close;
 $socket->close();

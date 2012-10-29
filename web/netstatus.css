@@ -30,7 +30,7 @@ img{ border:none; }
 .netcol { background-color: #00EE00; white-space:nowrap; }
 .online { background-color: #00FF00; white-space:nowrap; text-align: center; overflow: hidden; }
 .offline {	background-color: #FF0000; white-space:nowrap; text-align: center; }
-.local { background-color: #00CC00; white-space:nowrap; text-align: center; }
+.unlinked { background-color: #00CC00; white-space:nowrap; text-align: center; }
 .unknown {	background-color: #CCCCCC; white-space:nowrap; text-align: center; }
 .copyright{ float:left;}
 .credits{ float:right; 

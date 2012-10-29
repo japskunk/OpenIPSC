@@ -60,13 +60,15 @@ include '/usr/local/include/dmrdb.inc' ;
 date_default_timezone_set( 'UTC' ) ;
 $Date = date( 'l F jS, Y', time() ) ;
 $DateTime = date( 'd M y, H:i:s', time() ) ;
-$Query = "SELECT UserLog.StartTime AS StartTime, UserLog.DmrID AS DmrID, User.Callsign AS UserCallsign, User.Name AS UserName, UserLog.RepeaterID AS RepeaterID, Repeater.City AS RepeaterCity, Repeater.CallSign AS RepeaterCallsign, UserLog.DestinationID AS DestinationID, UserLog.SourceNet AS SourceNet, UserLog.TimeSlot AS TimeSlot, UserLog.GroupCall AS GroupCall, UserLog.PrivateCall AS PrivateCall, UserLog.VoiceCall AS VoiceCall, UserLog.DataCall AS DataCall, Talkgroup.Assignment AS Talkgroup FROM UserLog LEFT JOIN User ON (UserLog.DmrID = User.DmrID ) LEFT JOIN Talkgroup ON (UserLog.DestinationID = Talkgroup.DmrID) LEFT JOIN Repeater ON (UserLog.RepeaterID = Repeater.DmrID ) WHERE UserLog.RepeaterID LIKE '______' ORDER BY StartTime DESC LIMIT 100;" ;
+$Query = "SELECT UserLog.StartTime AS StartTime, UserLog.DmrID AS DmrID, User.Callsign AS UserCallsign, User.Name AS UserName, UserLog.RepeaterID AS RepeaterID, Repeater.City AS RepeaterCity, Repeater.CallSign AS RepeaterCallsign, UserLog.DestinationID AS DestinationID, UserLog.SourceNet AS SourceNet, UserLog.TimeSlot AS TimeSlot, UserLog.GroupCall AS GroupCall, UserLog.PrivateCall AS PrivateCall, UserLog.VoiceCall AS VoiceCall, UserLog.DataCall AS DataCall,UserLog.VoiceCall AS VoiceCall, Talkgroup.Assignment AS Talkgroup FROM UserLog LEFT JOIN User ON (UserLog.DmrID = User.DmrID ) LEFT JOIN Talkgroup ON (UserLog.DestinationID = Talkgroup.DmrID) LEFT JOIN Repeater ON (UserLog.RepeaterID = Repeater.DmrID ) WHERE UserLog.RepeaterID LIKE '______' ORDER BY StartTime DESC LIMIT 100;" ;
 mysql_query( $Query ) or die( "MYSQL ERROR:" . mysql_error() ) ;
 $Result = mysql_query( $Query ) or die( mysql_errno . " " . mysql_error() ) ;
 while ( $Event = mysql_fetch_array( $Result ) ) {
     $Talkgroup =   (is_null($Event[Talkgroup])?$Event[DestinationID]:$Event[Talkgroup]);
-    IF ($Event[GroupCall] == 1) $Audience = "GROUP";
-    IF ($Event[PrivateCall] == 1) $Audience = "PRIVATE";
+    $Audience = ($Event[GroupCall] == 1)?"GROUP":"PRIVATE";
+    $Type=($Event[DataCall]==1)?"DATA":"VOICE";
+    $UserCallsign=(is_null($Event[UserCallsign]))?"UNLISTED":$Event[UserCallsign];
+    $UserName=(is_null($Event[UserName]))?"UNLISTED":$Event[UserName];
 	$RowClass =    (($i % 2 != 0)?"odd":"even");
 	$Repeater =    $Event[RepeaterCity];
 	$LongAgo =     (duration(strtotime("now")-strtotime($Event[StartTime])));?>
@@ -74,8 +76,8 @@ while ( $Event = mysql_fetch_array( $Result ) ) {
                 <td nowrap class=<?=$RowClass?>><?=$Event[StartTime]?></td>
                 <td nowrap class=<?=$RowClass?>><?=$LongAgo?></td>
                 <td nowrap class=<?=$RowClass?>><?=$Event[DmrID]?></td>
-                <td nowrap class=<?=$RowClass?>><?=$Event[UserCallsign]?></td>
-                <td nowrap class=<?=$RowClass?>><?=$Event[UserName]?></td>
+                <td nowrap class=<?=$RowClass?>><?=$UserCallsign?></td>
+                <td nowrap class=<?=$RowClass?>><?=$UserName?></td>
                 <td nowrap class=<?=$RowClass?>><?=$Repeater?></td>
                 <td nowrap class=<?=$RowClass?>><?=$Event[RepeaterID]?></td>
                 <td nowrap class=<?=$RowClass?>><?=$Event[RepeaterCallsign]?></td>
