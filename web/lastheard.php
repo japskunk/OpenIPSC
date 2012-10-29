@@ -54,8 +54,6 @@
                     <th>Destination</th>
                     <th>Slot</th>
                     <th>Network</th>
-                    <th>Aud</th>
-                    <th>Type</th>
                 <tr>
                 <? 
 include '/usr/local/include/dmrdb.inc' ;
@@ -63,51 +61,51 @@ date_default_timezone_set( 'UTC' ) ;
 $Date = date( 'l F jS, Y', time() ) ;
 $DateTime = date( 'd M y, H:i:s', time() ) ;
 
-    
 $Query = "
-SELECT 
-    `t`.`DmrID`
-   ,`t`.`StartTime`
-   ,`t`.`DestinationID` 
-   ,`t`.`RepeaterID`
-   ,`t`.`SourceNet`
-   ,`t`.`TimeSlot`
-   ,`t`.`GroupCall`
-   ,`t`.`PrivateCall`
-   ,`t`.`VoiceCall`
-   ,`t`.`DataCall`
-   ,`User`.`Callsign` 		AS `UserCallsign`
-   ,`User`.`Name`     		AS `UserName`
-   ,`Network`.`Description`     AS `NetworkDescription`
-   ,`Repeater`.`Short`          AS `Short`
-   ,`Repeater`.`City`           AS `RepeaterCity`
-   ,`Repeater`.`CallSign`       AS `RepeaterCallsign`
-   ,`Talkgroup`.`Assignment`    AS `Talkgroup`
-FROM UserLog t
-LEFT JOIN   `User` 
-ON          `t`.`DmrID` = `User`.`DmrID`
-LEFT JOIN   `Network`
-ON          `t`.`SourceNet` = `Network`.`DmrID`
-LEFT JOIN   `Repeater` 
-ON          `t`.`RepeaterID` = `Repeater`.`DmrID`
-LEFT JOIN   `Talkgroup` 
-ON          `t`.`DestinationID` = `Talkgroup`.`DmrID`
-JOIN (
-	SELECT 		MAX( StartTime ) AS StartTime, DmrID
-	FROM 		UserLog
-	GROUP BY 	DmrID
-	)temp ON temp.DmrID = t.DmrID
-AND temp.StartTime = t.StartTime
-WHERE `Repeater`.`DmrID` IS NOT NULL
-ORDER BY  `t`.`StartTime` DESC";
+	SELECT 
+		 `LastHeard`.`DmrID`
+		,`LastHeard`.`StartTime`
+		,`LastHeard`.`SourceNet`
+		,`LastHeard`.`TimeSlot`
+		,`LastHeard`.`RepeaterID` 
+		,`LastHeard`.`DestinationID`
+   		,`User`.`Callsign` 		AS `UserCallsign`
+   		,`User`.`Name`     		AS `UserName`
+   		,`Network`.`Description`     AS `NetworkDescription`
+   		,`Repeater`.`Short`          AS `Short`
+   		,`Repeater`.`City`           AS `RepeaterCity`
+   		,`Repeater`.`CallSign`       AS `RepeaterCallsign`
+   		,`Talkgroup`.`Assignment`    AS `Talkgroup`
+	FROM 
+		`LastHeard`
+	LEFT JOIN   
+		`User` 
+	ON          
+		`LastHeard`.`DmrID` = `User`.`DmrID`
+	LEFT JOIN   
+		`Network`
+	ON          
+		`LastHeard`.`SourceNet` = `Network`.`DmrID`
+	LEFT JOIN   
+		`Repeater` 
+	ON          
+		`LastHeard`.`RepeaterID` = `Repeater`.`DmrID`
+	LEFT JOIN   
+		`Talkgroup` 
+	ON          
+		`LastHeard`.`DestinationID` = `Talkgroup`.`DmrID`
+	WHERE
+                `LastHeard`.`RepeaterID`
+        LIKE
+                '______'
+	ORDER BY  `LastHeard`.`StartTime` DESC";
 
 mysql_query( $Query ) or die( "MYSQL ERROR:" . mysql_error() ) ;
 $Result = mysql_query( $Query ) or die( mysql_errno . " " . mysql_error() ) ;
 while ( $Event = mysql_fetch_array( $Result ) ) {
-    $Audience = "" ; $Type = "" ;
 	$Talkgroup =   (is_null($Event[Talkgroup])?$Event[DestinationID]:$Event[Talkgroup]);
-    $UserName =    (is_null($Event[UserName]))?$Event[DmrID]:$Event[UserCallsign].str_repeat('&nbsp',(7-strlen($Event[UserCallsign]))).$Event[UserName];
-    $Audience=     ($Event[GroupCall] == 1?"GROUP":"PRIVATE");
+	$UserName =    (is_null($Event[UserName]))?$Event[DmrID]:$Event[UserCallsign].str_repeat('&nbsp',(7-strlen($Event[UserCallsign]))).$Event[UserName];
+	$Audience=     ($Event[GroupCall] == 1?"GROUP":"PRIVATE");
 	$Type =        ($Event[VoiceCall] == 1?"VOICE":"DATA");
 	$RowClass =    (($i % 2 != 0)?"odd":"even");
 	$Repeater =    (is_null($Event[RepeaterCity]))?$Event[RepeaterID]:$Event[RepeaterCallsign].str_repeat('&nbsp',(7-strlen($Event[RepeaterCallsign]))).$Event[RepeaterCity];
@@ -120,8 +118,6 @@ while ( $Event = mysql_fetch_array( $Result ) ) {
                     <td nowrap class=<?=$RowClass?>><?=$Talkgroup?></td>
                     <td nowrap class=<?=$RowClass?>><?=$Event[TimeSlot]?></td>
                     <td nowrap class=<?=$RowClass?>><?=$Event[NetworkDescription]?></td>
-                    <td nowrap class=<?=$RowClass?>><?= "" ?></td>
-                    <td nowrap class=<?=$RowClass?>><?= "" ?></td>
                 </tr>
                 <?
     $i++ ;
