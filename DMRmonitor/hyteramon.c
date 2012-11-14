@@ -64,6 +64,40 @@ void processPacket(u_char *arg, const struct pcap_pkthdr* pkthdr, const u_char *
 		value = strtol(buffer,NULL,16);
 		printf("%s %d %02x %02x %02x %li\n",inet_ntoa(ip->ip_src), ntohs(udp->uh_dport), *(packet+4), *(packet+62), *(packet+8), value);
 	}
+  	if (debug == 1) {
+                uint32_t i=0, j=0;
+                printf("\n\n\n");
+                printf("Packet Count:\t%d\n", ++(*counter));
+                printf("Packet Size:\t%d\n", capture_len);
+                printf("Size ETH Header\t%lu\n",sizeof(struct ether_header));
+                printf("Size IP Header\t%u\n",IP_header_length);
+                printf("UDP Src Port\t%d\n", ntohs(udp->uh_sport));
+                printf("IDP Dst Port\t%d\n", ntohs(udp->uh_dport));
+                printf("Packet Type\t%lu\n",PacketType);
+                printf("Packet Desc\t%s\n",packetDescription);
+                printf("Source ID\t%lu\n",SourceID);
+                printf("\n%04x ",j);
+                while (i < capture_len) {
+                        printf("%02x ", packet[i]);
+                        i++;
+                        j++;
+                        if (j == 8) {
+                                printf("  ");
+                        }
+                        if (j == 16) {
+                                printf("\n%04x ",i);
+                                j=0;
+                        }
+                }
+        }
+        if (debug == 2) {
+                while (i < capture_len) {
+                        printf("%02X", packet[i]);
+                        i++;
+                }
+        printf("\n");
+        }
+
 }
 int main(int argc, char *argv[] )
 {
@@ -72,8 +106,14 @@ int main(int argc, char *argv[] )
         u_int netmask;
         pcap_t *descr = NULL;
         int32_t c;
-        while ((c = getopt(argc, argv, "Vhi:")) != EOF) {
+         while ((c = getopt(argc, argv, "opdVhi:")) != EOF) {
                 switch (c) {
+                case 'd':
+                        debug = 1;
+                        break;
+                case 'p':
+                        debug = 2;
+                        break;
                 case 'V':
                         version();
                         break;
@@ -83,9 +123,9 @@ int main(int argc, char *argv[] )
                 case 'h':
                         usage(-1);
                         break;
-		}
+                }
         }
-        if (devname == NULL) {
+	if (devname == NULL) {
                 usage(-1);
         }
         if (debug == 1) {
@@ -114,9 +154,11 @@ void usage(int8_t e)
         printf(	"Usage: DMRmontiorHytera [OPTION]... \n"
                 "Listen send DMR data for remote server for processing\n"
                 "\n"
-                "   -i, --interface	Interface to listen on\n"
-                "   -h, --help		This Help\n"
-                "   -V, --version	Version Information\n"
+		"   -i, --interface     Interface to listen on\n"
+                "   -h, --help          This Help\n"
+                "   -V, --version       Version Information\n"
+                "   -d, --debug         Show verbose information\n"
+                "   -p, --payload       Dump UDP payload data in one line hex (usefull for reverse engineering)\n"
                 "\n"
                 "Report cat bugs to kd8eyf@digitalham.info\n");
         exit(e);
