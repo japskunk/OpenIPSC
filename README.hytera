@@ -7,7 +7,7 @@ Keepalive/Control? 60/102/146/162 bytes port 30000/30002
 |0                   1                   2                   3           | 
 |0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 |
 |------------------------------------------------------------------------|
-|        <>      <>                                  <---- AMBE+2 VOICE  |
+|< ASCII><>      <><ASCI>                           <---- AMBE+2 VOICE  |
 |------------------------------------------------------------------------|
 
 cont...
@@ -18,6 +18,9 @@ cont...
 |------------------------------------------------------------------------|
 |----> <--SYNC --> <---- AMBE+2 VOICE    ---->       <>  <gid ><sid >    |
 |------------------------------------------------------------------------|
+OFFSET 0 - 3
+  "ZZZZ" - some form of special frame, always denoted with
+           pattern at offset 0x08
 OFFSET 4
   0x00 - 0xFF? = Voice / Data Frame Seq Num
 
@@ -25,6 +28,11 @@ OFFSET 8
   0x01 = Voice/Data Frame
   0x02 = Sync Frame?
   0x03 = End of Transmission
+  0x42 = "B" as a part of "BZZZ"
+
+OFFSET 9
+  "ZZZ" - only when the value at offset 8 is "B"
+          always associated with pattern at Offset 0x00 noted above
 
 OFFSET 26 - 38 plus high order nibble of 39 for 13.5 bytes
   AMBE+2 1 of 2 VOICE AND DATA 
