@@ -45,7 +45,7 @@ void processPacket(u_char *arg, const struct pcap_pkthdr* pkthdr, const u_char *
         int PacketType;
         long value;
         int i=0, *counter = (int *)arg;
-	int DmrID ;
+	int DmrID = 0;
 	int RepeaterID = 0;
 	int DestinationID = 0;
 	int sync = 0;
