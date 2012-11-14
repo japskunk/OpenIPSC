@@ -51,4 +51,10 @@ OFFSET 64 - 66
   Destination Group ID ( big endian )
 
 OFFSET 67 - 69 
-  Source ID ( big endian )
+  Source ID ( big endian ) - First Byte Missing !
+
+OFFSET 22 - 23
+  "1111" - Sync Packet
+
+OFFSET 38,40,42 ( Sync Packet )
+   Source Radio ID Bytes
