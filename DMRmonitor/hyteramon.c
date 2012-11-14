@@ -41,12 +41,15 @@ void processPacket(u_char *arg, const struct pcap_pkthdr* pkthdr, const u_char *
         struct UDP_hdr * udp;
         unsigned int IP_header_length;
         unsigned int capture_len = pkthdr->len;
-        char buffer[15];				// Used for temporay data conversions
-        long PacketType,SourceID, UserID, DestinationID;
+        char buffer[15];				// Used for temporay data conversions since i dont know how to program yet :)
+        int PacketType;
         long value;
-	char *packetDescription ="unknown";
         int i=0, *counter = (int *)arg;
-        isDMR = 0; 
+	int DmrID ;
+	int RepeaterID = 0;
+	int DestinationID = 0;
+	int sync = 0;
+	PacketType = 0; 
 	packet += sizeof (struct ether_header);
         capture_len -= sizeof(struct ether_header);
         ip = (struct ip*) packet;
@@ -56,39 +59,41 @@ void processPacket(u_char *arg, const struct pcap_pkthdr* pkthdr, const u_char *
         udp = (struct UDP_hdr*) packet;
         packet += sizeof (struct UDP_hdr);
         capture_len -= sizeof (struct UDP_hdr);
-        sprintf(buffer,"%x",*packet);
-        PacketType = strtol(buffer,NULL,16);
-        if (capture_len == 72) {
-		isDMR = 1;
-		sprintf(buffer,"%02x%02x%02x%02x", *(packet+67), *(packet+66), *(packet+65), *(packet+64));
-		value = strtol(buffer,NULL,16);
-		printf("%s %d %02x %02x %02x %li\n",inet_ntoa(ip->ip_src), ntohs(udp->uh_dport), *(packet+4), *(packet+62), *(packet+8), value);
+	if (capture_len == 72) {
+		PacketType = 1;
+		sprintf(buffer,"%02x%02x%02x", *(packet+66), *(packet+65), *(packet+64));
+		DestinationID = strtol(buffer,NULL,16);
+		sprintf(buffer,"%02x%02x", *(packet+22), *(packet+23));
+		sync = strtol(buffer,NULL,16);
+		if (sync == 4369){
+			 sprintf(buffer,"%02x%02x%02x", *(packet+38), *(packet+40), *(packet+42));
+			 DmrID = strtol(buffer,NULL,16);
+		}
+		printf("%s %i %i\n",inet_ntoa(ip->ip_src), DmrID, DestinationID);
 	}
   	if (debug == 1) {
                 uint32_t i=0, j=0;
                 printf("\n\n\n");
-                printf("Packet Count:\t%d\n", ++(*counter));
-                printf("Packet Size:\t%d\n", capture_len);
-                printf("Size ETH Header\t%lu\n",sizeof(struct ether_header));
-                printf("Size IP Header\t%u\n",IP_header_length);
-                printf("UDP Src Port\t%d\n", ntohs(udp->uh_sport));
-                printf("IDP Dst Port\t%d\n", ntohs(udp->uh_dport));
-                printf("Packet Type\t%lu\n",PacketType);
-                printf("Packet Desc\t%s\n",packetDescription);
-                printf("Source ID\t%lu\n",SourceID);
-                printf("\n%04x ",j);
-                while (i < capture_len) {
-                        printf("%02x ", packet[i]);
-                        i++;
-                        j++;
-                        if (j == 8) {
-                                printf("  ");
-                        }
-                        if (j == 16) {
-                                printf("\n%04x ",i);
-                                j=0;
-                        }
-                }
+                printf("UDP Size:\t%d\n", capture_len);
+                printf("UDP Src/Dst \t%d/%d\n", ntohs(udp->uh_sport), ntohs(udp->uh_dport));
+                printf("Packet Type\t%i\n",PacketType);
+                printf("Repeater ID\t%i\n",RepeaterID);
+		printf("Source ID\t%i\n",DmrID);
+                printf("Destination ID\t%i\n",DestinationID);
+		printf("22-23\t%02x%02x\n",*(packet+22), *(packet+23));
+		//printf("\n%04x ",j);
+                //while (i < capture_len) {
+                //        printf("%02x ", packet[i]);
+                //        i++;
+                //        j++;
+                //        if (j == 8) {
+                //                printf("  ");
+                //        }
+                //        if (j == 16) {
+                //                printf("\n%04x ",i);
+                //                j=0;
+                //        }
+                //}
         }
         if (debug == 2) {
                 while (i < capture_len) {
