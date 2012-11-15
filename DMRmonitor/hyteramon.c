@@ -49,6 +49,11 @@ void processPacket(u_char *arg, const struct pcap_pkthdr* pkthdr, const u_char *
 	int RepeaterID = 0;
 	int DestinationID = 0;
 	int sync = 0;
+	int Timeslot = 0;
+	time_t Time;	
+	extern long RepeaterID[2],LastReleaterID[2];
+
+
 	PacketType = 0; 
 	packet += sizeof (struct ether_header);
         capture_len -= sizeof(struct ether_header);
@@ -69,28 +74,21 @@ void processPacket(u_char *arg, const struct pcap_pkthdr* pkthdr, const u_char *
 			if (sync == 4369){
 				 sprintf(buffer,"%02x%02x%02x", *(packet+38), *(packet+40), *(packet+42));
 				 DmrID = strtol(buffer,NULL,16);
-			}
-			printf("%s %i %i\n",inet_ntoa(ip->ip_src), DmrID, DestinationID);
+				 sprintf(buffer,"%02x%02x", *(packet+16), *(packet+17));
+				 Timeslot = strtol(buffer,NULL,16);
+			         if (Timeslot == 4369){ Timeslot = 1; };
+				 if (Timeslot == 8738){ Timeslot = 2; };
+			printf("%s %i %i %i\n",inet_ntoa(ip->ip_src), Timeslot,  DmrID, DestinationID);
+			};
 		}
 	}
-  	if (debug == 1) {
-                uint32_t i=0, j=0;
-                printf("\n\n\n");
-                printf("UDP Size:\t%d\n", capture_len);
-                printf("UDP Src/Dst \t%d/%d\n", ntohs(udp->uh_sport), ntohs(udp->uh_dport));
-                printf("Packet Type\t%i\n",PacketType);
-                printf("Repeater ID\t%i\n",RepeaterID);
-		printf("Source ID\t%i\n",DmrID);
-                printf("Destination ID\t%i\n",DestinationID);
-		printf("22-23\t%02x%02x\n",*(packet+22), *(packet+23));
-        }
-        if (debug == 2) {
-                while (i < capture_len) {
-                        printf("%02X", packet[i]);
-                        i++;
-                }
-        printf("\n");
-        }
+        //if (debug == 2) {
+        //        while (i < capture_len) {
+        //                printf("%02X", packet[i]);
+        //                i++;
+        //        }
+        //printf("\n");
+        //}
 
 }
 int main(int argc, char *argv[] )
