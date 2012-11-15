@@ -21,7 +21,7 @@ cont...
 OFFSET 0 - 3
   "ZZ ZZ ZZ ZZ" = some form of special frame, always denoted with
                   pattern at offset 0x08
-  "75 31 00 50" = Offset 18 - 19 "BBBB"
+  "75 31 00 50" = Offset 18 - 19 "BBBB" or "1111"
 
 OFFSET 4 
   00 to FF = Voice Frame Sequence Number Looping
