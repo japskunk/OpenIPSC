@@ -59,17 +59,19 @@ void processPacket(u_char *arg, const struct pcap_pkthdr* pkthdr, const u_char *
         udp = (struct UDP_hdr*) packet;
         packet += sizeof (struct UDP_hdr);
         capture_len -= sizeof (struct UDP_hdr);
-	if (capture_len == 72) {
-		PacketType = 1;
-		sprintf(buffer,"%02x%02x%02x", *(packet+66), *(packet+65), *(packet+64));
-		DestinationID = strtol(buffer,NULL,16);
-		sprintf(buffer,"%02x%02x", *(packet+22), *(packet+23));
-		sync = strtol(buffer,NULL,16);
-		if (sync == 4369){
-			 sprintf(buffer,"%02x%02x%02x", *(packet+38), *(packet+40), *(packet+42));
-			 DmrID = strtol(buffer,NULL,16);
+	if (debug == 0) {
+		if (capture_len == 72) {
+			PacketType = 1;
+			sprintf(buffer,"%02x%02x%02x", *(packet+66), *(packet+65), *(packet+64));
+			DestinationID = strtol(buffer,NULL,16);
+			sprintf(buffer,"%02x%02x", *(packet+22), *(packet+23));
+			sync = strtol(buffer,NULL,16);
+			if (sync == 4369){
+				 sprintf(buffer,"%02x%02x%02x", *(packet+38), *(packet+40), *(packet+42));
+				 DmrID = strtol(buffer,NULL,16);
+			}
+			printf("%s %i %i\n",inet_ntoa(ip->ip_src), DmrID, DestinationID);
 		}
-		printf("%s %i %i\n",inet_ntoa(ip->ip_src), DmrID, DestinationID);
 	}
   	if (debug == 1) {
                 uint32_t i=0, j=0;
@@ -81,19 +83,6 @@ void processPacket(u_char *arg, const struct pcap_pkthdr* pkthdr, const u_char *
 		printf("Source ID\t%i\n",DmrID);
                 printf("Destination ID\t%i\n",DestinationID);
 		printf("22-23\t%02x%02x\n",*(packet+22), *(packet+23));
-		//printf("\n%04x ",j);
-                //while (i < capture_len) {
-                //        printf("%02x ", packet[i]);
-                //        i++;
-                //        j++;
-                //        if (j == 8) {
-                //                printf("  ");
-                //        }
-                //        if (j == 16) {
-                //                printf("\n%04x ",i);
-                //                j=0;
-                //        }
-                //}
         }
         if (debug == 2) {
                 while (i < capture_len) {
