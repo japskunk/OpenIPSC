@@ -25,13 +25,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA. 
 #include<netinet/udp.h>
 #include<netinet/ip.h>
 #include<getopt.h>
+#include<time.h>	
 struct UDP_hdr {
         u_short	uh_sport;				//Source Port
         u_short	uh_dport;				//Destnation Port
         u_short	uh_ulen;				//Datagram Length
         u_short	uh_sum;					//Datagram Checksum
 };
-int  isDMR=0,DMRonly=0,debug = 0;
+int debug = 0;
 char *devname = NULL;
 uint16_t SrcID = ((uint16_t)67 << 8) | ((uint16_t)65 << 0);
 void usage( int8_t e );
@@ -46,14 +47,12 @@ void processPacket(u_char *arg, const struct pcap_pkthdr* pkthdr, const u_char *
         long value;
         int i=0, *counter = (int *)arg;
 	int DmrID = 0;
-	int RepeaterID = 0;
 	int DestinationID = 0;
 	int sync = 0;
 	int Timeslot = 0;
 	time_t Time;	
-	extern long RepeaterID[2],LastReleaterID[2];
-
-
+	struct in_addr RepeaterID[2];
+	struct tm * tm;
 	PacketType = 0; 
 	packet += sizeof (struct ether_header);
         capture_len -= sizeof(struct ether_header);
@@ -64,31 +63,44 @@ void processPacket(u_char *arg, const struct pcap_pkthdr* pkthdr, const u_char *
         udp = (struct UDP_hdr*) packet;
         packet += sizeof (struct UDP_hdr);
         capture_len -= sizeof (struct UDP_hdr);
-	if (debug == 0) {
-		if (capture_len == 72) {
-			PacketType = 1;
-			sprintf(buffer,"%02x%02x%02x", *(packet+66), *(packet+65), *(packet+64));
-			DestinationID = strtol(buffer,NULL,16);
-			sprintf(buffer,"%02x%02x", *(packet+22), *(packet+23));
+	Time = time(NULL);
+	tm = gmtime (&Time);
+	if ((capture_len == 72) && (debug != 2)) {
+		sprintf(buffer,"%02x", *(packet+8));
+                PacketType = strtol(buffer,NULL,16);
+			
+			sprintf(buffer,"%02x%02x", *(packet+22), *(packet+23));		// LOOK FOR OUT EEEE SYNC PACKETS
 			sync = strtol(buffer,NULL,16);
+			printf(" %i ",PacketType);
 			if (sync == 4369){
-				 sprintf(buffer,"%02x%02x%02x", *(packet+38), *(packet+40), *(packet+42));
-				 DmrID = strtol(buffer,NULL,16);
-				 sprintf(buffer,"%02x%02x", *(packet+16), *(packet+17));
-				 Timeslot = strtol(buffer,NULL,16);
-			         if (Timeslot == 4369){ Timeslot = 1; };
-				 if (Timeslot == 8738){ Timeslot = 2; };
-			printf("%s %i %i %i\n",inet_ntoa(ip->ip_src), Timeslot,  DmrID, DestinationID);
+				sprintf(buffer,"%02x%02x", *(packet+16), *(packet+17));
+                                Timeslot = strtol(buffer,NULL,16);
+				if (Timeslot == 4369){ Timeslot = 1; };
+                                if (Timeslot == 8738){ Timeslot = 2; };
+				
+				sprintf(buffer,"%02x", *(packet+8));
+				PacketType = strtol(buffer,NULL,16);
+
+				sprintf(buffer,"%02x%02x%02x", *(packet+38), *(packet+40), *(packet+42));
+				DmrID = strtol(buffer,NULL,16);
+				
+				sprintf(buffer,"%02x%02x%02x", *(packet+66), *(packet+65), *(packet+64));
+                                DestinationID = strtol(buffer,NULL,16);
+				
+				RepeaterID[Timeslot] = ip->ip_src;
+				printf("%04d-%02d-%02d ",tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday);
+		                printf("%02d:%02d:%02d ",tm->tm_hour, tm->tm_min, tm->tm_sec);			
+				printf("%s %i %i %i %i\n",inet_ntoa(ip->ip_src), PacketType, Timeslot,  DmrID, DestinationID);
 			};
 		}
-	}
-        //if (debug == 2) {
-        //        while (i < capture_len) {
-        //                printf("%02X", packet[i]);
-        //                i++;
-        //        }
-        //printf("\n");
-        //}
+        if (debug == 2) {
+                 printf("%s -> %s ",inet_ntoa(ip->ip_src), inet_ntoa(ip->ip_dst));
+		while (i < capture_len) {
+                        printf("%02X", packet[i]);
+                        i++;
+               }
+        printf("\n");
+        }
 
 }
 int main(int argc, char *argv[] )
@@ -158,7 +170,7 @@ void usage(int8_t e)
 
 int version ( void )
 {
-        printf ("DMRmonitorHytera 0.03\n");
+        printf ("hytera 0.03\n");
         exit(1);
 }
 
