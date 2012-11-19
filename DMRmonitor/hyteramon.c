@@ -42,14 +42,13 @@ void processPacket(u_char *arg, const struct pcap_pkthdr* pkthdr, const u_char *
         struct UDP_hdr * udp;
         unsigned int IP_header_length;
         unsigned int capture_len = pkthdr->len;
-        char buffer[15];				// Used for temporay data conversions since i dont know how to program yet :)
         int PacketType;
         long value;
         int i=0, *counter = (int *)arg;
 	int DmrID = 0;
 	int DestinationID = 0;
-	int sync = 0;
-	int Timeslot = 0;
+	uint16_t sync = 0;
+	uint16_t Timeslot = 0;
 	time_t Time;	
 	struct in_addr RepeaterID[2];
 	struct tm * tm;
@@ -66,26 +65,14 @@ void processPacket(u_char *arg, const struct pcap_pkthdr* pkthdr, const u_char *
 	Time = time(NULL);
 	tm = gmtime (&Time);
 	if ((capture_len == 72) && (debug != 2)) {
-		sprintf(buffer,"%02x", *(packet+8));
-                PacketType = strtol(buffer,NULL,16);
-			
-			sprintf(buffer,"%02x%02x", *(packet+22), *(packet+23));		// LOOK FOR OUT EEEE SYNC PACKETS
-			sync = strtol(buffer,NULL,16);
+                PacketType = *(packet+8);
+	        sync  = *(packet+22)<<8|*(packet+23);
 			if (sync == 4369){
-				sprintf(buffer,"%02x%02x", *(packet+16), *(packet+17));
-                                Timeslot = strtol(buffer,NULL,16);
+				Timeslot = *(packet+16)<<8|*(packet+17);
 				if (Timeslot == 4369){ Timeslot = 1; };
                                 if (Timeslot == 8738){ Timeslot = 2; };
-				
-				sprintf(buffer,"%02x", *(packet+8));
-				PacketType = strtol(buffer,NULL,16);
-
-				sprintf(buffer,"%02x%02x%02x", *(packet+38), *(packet+40), *(packet+42));
-				DmrID = strtol(buffer,NULL,16);
-				
-				sprintf(buffer,"%02x%02x%02x", *(packet+66), *(packet+65), *(packet+64));
-                                DestinationID = strtol(buffer,NULL,16);
-				
+			 	DmrID = *(packet+38)<<16|*(packet+40)<<8|*(packet+42);	
+			        DestinationID = *(packet+66)<<16|*(packet+65)<<8|*(packet+64)	
 				RepeaterID[Timeslot] = ip->ip_src;
 				printf("%04d-%02d-%02d ",tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday);
 		                printf("%02d:%02d:%02d ",tm->tm_hour, tm->tm_min, tm->tm_sec);			
