@@ -40,17 +40,27 @@ void processPacket(u_char *arg, const struct pcap_pkthdr* pkthdr, const u_char *
 {
         struct ip * ip;
         struct UDP_hdr * udp;
+	struct slot{
+		int Status;
+		int CallType;
+		int SourceID;
+		int DestinationID;
+	};
+	struct repeater{
+		struct ip RepeaterID;
+		struct slot slot1;
+		struct slot slot2;
+	};
         unsigned int IP_header_length;
         unsigned int capture_len = pkthdr->len;
         int PacketType;
         long value;
         int i=0, *counter = (int *)arg;
 	uint32_t DmrID = 0;
-	uint32_t DestinationID = 0;
 	uint16_t sync = 0;
 	uint16_t Timeslot = 0;
 	time_t Time;	
-	struct in_addr RepeaterID[2];
+	uint32_t DestinationID;
 	struct tm * tm;
 	PacketType = 0; 
 	packet += sizeof (struct ether_header);
@@ -67,32 +77,27 @@ void processPacket(u_char *arg, const struct pcap_pkthdr* pkthdr, const u_char *
 	printdata();
 	if ((capture_len == 72) && (debug != 2)) {
                 PacketType = *(packet+8);
-	        sync  = *(packet+22)<<8|*(packet+23);
-			if (sync == 4369){
-				Timeslot = *(packet+16)<<8|*(packet+17);
-				if (Timeslot == 4369){ Timeslot = 1; };
-                                if (Timeslot == 8738){ Timeslot = 2; };
-			 	DmrID = *(packet+38)<<16|*(packet+40)<<8|*(packet+42);	
-			        DestinationID = *(packet+66)<<16|*(packet+65)<<8|*(packet+64);	
-				RepeaterID[Timeslot] = ip->ip_src;
-				printf("%04d-%02d-%02d ",tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday);
-		                printf("%02d:%02d:%02d ",tm->tm_hour, tm->tm_min, tm->tm_sec);			
-				printf("%s %i %i %i %i\n",inet_ntoa(ip->ip_src), PacketType, Timeslot,  DmrID, DestinationID);
+		sync  = *(packet+22)<<8|*(packet+23);
+	        printf("PT: %i SYNC: %i\n",PacketType,sync);
+		if (sync == 4369){
+			if (Timeslot == 4369){ Timeslot = 1; };
+                        if (Timeslot == 8738){ Timeslot = 2; };
+			DmrID = *(packet+38)<<16|*(packet+40)<<8|*(packet+42);
+                        DestinationID = *(packet+66)<<16|*(packet+65)<<8|*(packet+64);
+                        RepeaterID = ip->ip_src;
+
+			if PacketType = 2 {	//New or Continued Call
+				repeater	
+			}
+			if PacketType = 3 {	//End Of Call
+			}
+			Timeslot = *(packet+16)<<8|*(packet+17);
 			};
 		}
-        if (debug == 2) {
-                printf("%s",inet_ntoa(ip->ip_src));
-		printf(":%d -> ",ntohs(udp->uh_sport));
-		printf("%s", inet_ntoa(ip->ip_dst));			
-	        printf(":%d -> ",ntohs(udp->uh_dport));
-		while (i < capture_len) {
-                        printf("%02X", packet[i]);
-                        i++;
-               }
-        printf("\n");
+		
         }
 
-}
+
 int main(int argc, char *argv[] )
 {
         char packet_filter[] = "ip and udp";
@@ -102,13 +107,13 @@ int main(int argc, char *argv[] )
         int32_t c;
          while ((c = getopt(argc, argv, "opdVhi:")) != EOF) {
                 switch (c) {
-                case 'd':
-                        debug = 1;
-                        break;
                 case 'p':
                         debug = 2;
                         break;
-                case 'V':
+                case 'd':
+			debug = 1;
+			break;
+		case 'V':
                         version();
                         break;
                 case 'i':
@@ -151,7 +156,7 @@ void usage(int8_t e)
 		"   -i, --interface     Interface to listen on\n"
                 "   -h, --help          This Help\n"
                 "   -V, --version       Version Information\n"
-                "   -d, --debug         Show verbose information\n"
+                "   -d, --debug         Show whats happening in english\n"
                 "   -p, --payload       Dump UDP payload data in one line hex (usefull for reverse engineering)\n"
                 "\n"
                 "Report cat bugs to kd8eyf@digitalham.info\n");
@@ -160,23 +165,30 @@ void usage(int8_t e)
 
 int version ( void )
 {
-        printf ("hytera 0.03\n");
+        printf ("hytera 0.04\n");
         exit(1);
 }
 
-int printdata (stuct *tm )
+int printdata ()
 {
- printf("%04d-%02d-%02d ",tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday);
-                                printf("%02d:%02d:%02d ",tm->tm_hour, tm->tm_min, tm->tm_sec);
-                                printf("%s %i %i %i %i\n",inet_ntoa(ip->ip_src), PacketType, Timeslot,  DmrID, DestinationID);
+///	if (debug == 0) {
+///		printf("%04d-%02d-%02d ",tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday);
+///	        printf("%02d:%02d:%02d ",tm->tm_hour, tm->tm_min, tm->tm_sec);
+///        	printf("%s %i %i %i %i\n",inet_ntoa(ip->ip_src), PacketType, Timeslot,  DmrID, DestinationID);
+///	}
+///	if (debug == 1) {
+///	}g
+///	if (debug == 2) {
+///                printf("%s",inet_ntoa(ip->ip_src));
+///                printf(":%d -> ",ntohs(udp->uh_sport));
+///                printf("%s", inet_ntoa(ip->ip_dst));
+///                printf(":%d -> ",ntohs(udp->uh_dport));
+///                while (i < capture_len) {
+///                        printf("%02X", packet[i]);
+///                        i++;
+///               	}
+///        	printf("\n");
+///        }
+///
 }
-
-
-
-
-
-
-
-
-
 
