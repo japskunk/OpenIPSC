@@ -71,7 +71,6 @@ void processPacket(u_char *arg, const struct pcap_pkthdr* pkthdr, const u_char *
 			
 			sprintf(buffer,"%02x%02x", *(packet+22), *(packet+23));		// LOOK FOR OUT EEEE SYNC PACKETS
 			sync = strtol(buffer,NULL,16);
-			printf(" %i ",PacketType);
 			if (sync == 4369){
 				sprintf(buffer,"%02x%02x", *(packet+16), *(packet+17));
                                 Timeslot = strtol(buffer,NULL,16);
@@ -94,7 +93,10 @@ void processPacket(u_char *arg, const struct pcap_pkthdr* pkthdr, const u_char *
 			};
 		}
         if (debug == 2) {
-                 printf("%s -> %s ",inet_ntoa(ip->ip_src), inet_ntoa(ip->ip_dst));
+                printf("%s",inet_ntoa(ip->ip_src));
+		printf(":%d -> ",ntohs(udp->uh_sport));
+		printf("%s", inet_ntoa(ip->ip_dst));			
+	        printf(":%d -> ",ntohs(udp->uh_dport));
 		while (i < capture_len) {
                         printf("%02X", packet[i]);
                         i++;
