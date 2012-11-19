@@ -45,8 +45,8 @@ void processPacket(u_char *arg, const struct pcap_pkthdr* pkthdr, const u_char *
         int PacketType;
         long value;
         int i=0, *counter = (int *)arg;
-	int DmrID = 0;
-	int DestinationID = 0;
+	uint32_t DmrID = 0;
+	uint32_t DestinationID = 0;
 	uint16_t sync = 0;
 	uint16_t Timeslot = 0;
 	time_t Time;	
@@ -64,6 +64,7 @@ void processPacket(u_char *arg, const struct pcap_pkthdr* pkthdr, const u_char *
         capture_len -= sizeof (struct UDP_hdr);
 	Time = time(NULL);
 	tm = gmtime (&Time);
+	printdata();
 	if ((capture_len == 72) && (debug != 2)) {
                 PacketType = *(packet+8);
 	        sync  = *(packet+22)<<8|*(packet+23);
@@ -72,7 +73,7 @@ void processPacket(u_char *arg, const struct pcap_pkthdr* pkthdr, const u_char *
 				if (Timeslot == 4369){ Timeslot = 1; };
                                 if (Timeslot == 8738){ Timeslot = 2; };
 			 	DmrID = *(packet+38)<<16|*(packet+40)<<8|*(packet+42);	
-			        DestinationID = *(packet+66)<<16|*(packet+65)<<8|*(packet+64)	
+			        DestinationID = *(packet+66)<<16|*(packet+65)<<8|*(packet+64);	
 				RepeaterID[Timeslot] = ip->ip_src;
 				printf("%04d-%02d-%02d ",tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday);
 		                printf("%02d:%02d:%02d ",tm->tm_hour, tm->tm_min, tm->tm_sec);			
@@ -163,7 +164,12 @@ int version ( void )
         exit(1);
 }
 
-
+int printdata (stuct *tm )
+{
+ printf("%04d-%02d-%02d ",tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday);
+                                printf("%02d:%02d:%02d ",tm->tm_hour, tm->tm_min, tm->tm_sec);
+                                printf("%s %i %i %i %i\n",inet_ntoa(ip->ip_src), PacketType, Timeslot,  DmrID, DestinationID);
+}
 
 
 
