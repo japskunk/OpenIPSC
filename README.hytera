@@ -7,7 +7,7 @@ Keepalive/Control? 60/102/146/162 bytes port 30000/30002
 |0                   1                   2                   3           | 
 |0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 |
 |------------------------------------------------------------------------|
-|< ASCII><>      <><ASCI>                            <---- AMBE+2 VOICE  |
+|<4 BYTE><>      <><ASCI>                            <---- AMBE+2 VOICE  |
 |------------------------------------------------------------------------|
 
 cont...
@@ -19,9 +19,10 @@ cont...
 |----> <--SYNC --> <---- AMBE+2 VOICE    ---->       <>  <gid ><sid >    |
 |------------------------------------------------------------------------|
 OFFSET 0 - 3
-  "ZZ ZZ ZZ ZZ" = some form of special frame, always denoted with
+  "ZZZZ"        = some form of special frame, always denoted with
                   pattern at offset 0x08
-  "75 31 00 50" = Offset 18 - 19 "BBBB" or "1111"
+  0xXXXX        = Offset 18 - 19 "BBBB" or "1111"
+                  the first 2 bytes are the port number e.g. 0x7531 = 30001
 
 OFFSET 4 
   00 to FF = Voice Frame Sequence Number Looping
